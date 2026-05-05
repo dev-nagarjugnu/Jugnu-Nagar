@@ -1,0 +1,16 @@
+{
+    "sections": {
+        "gift-guide": {
+            "type": "gift-guide",
+            "settings": {}
+        },
+        "gift-guide-products": {
+                "title": "gift-guide-products",
+                "settings": {}
+            }
+    },
+    "order": [
+        "gift-guide-banner",
+        "gift-guide-products"
+    ]
+}

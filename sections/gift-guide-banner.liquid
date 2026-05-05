@@ -1,173 +1,87 @@
-{% comment %}
-  Gift Guide Banner Section
-  - Displays the hero banner for the Gift Guide page
-  - Includes SVG illustration background, title, subtitle and CTA button
-  - Font used: Jost (matches Figma design exactly)
-{% endcomment %}
-
-{% comment %} Load Jost font from Google Fonts as specified in Figma {% endcomment %}
-<link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500&family=Lustria&display=swap" rel="stylesheet">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<div class="gg-banner">
-
-  {% comment %} SVG illustration background — exported directly from Figma {% endcomment %}
-  <div class="gg-banner__illustration">
-    <img 
-      src="https://cdn.shopify.com/s/files/1/0787/4730/4121/files/Frame.svg?v=1777973720" 
-      alt="Gift guide illustrations"
-      class="gg-banner__svg"
-    >
-  </div>
-
-  {% comment %} Banner content — left aligned as per Figma {% endcomment %}
-  <div class="gg-banner__content">
-
-    {% comment %} Main title — 70px Jost Medium as per Figma {% endcomment %}
-    <h1 class="gg-banner__title">The Gift Guide</h1>
-
-    {% comment %} Subtitle text — 20px Jost Regular as per Figma {% endcomment %}
-    <p class="gg-banner__subtitle">
-      Discover Joy: Your Ultimate Holiday Gift Destination. 
-      Explore our curated selection and find the perfect gifts to 
-      delight your loved ones this holiday season.
-    </p>
-
-    {% comment %} Shop Now CTA button — black background with arrow as per Figma {% endcomment %}
-    <a href="/collections/gift-guide" class="gg-banner__btn">
-      SHOP NOW &nbsp; &#8594;
-    </a>
-
-  </div>
-
-  {% comment %} Bottom ticker text — as seen in Figma design {% endcomment %}
-  <div class="gg-banner__ticker">
-    <p>SUSTAINABLE, ETHICALLY MADE CLOTHES IN SIZES XXS TO 6XL</p>
-  </div>
-
-</div>
-
 <style>
   /* =====================
      Gift Guide Banner
-     Matches Figma Desktop-22 frame exactly
+     Fixed responsive layout
   ===================== */
 
   /* Main banner wrapper */
   .gg-banner {
     position: relative;
     width: 100%;
-    height: 100vh;
-    min-height: 600px;
+    height: 878px;
     background: #FFFFFF;
     overflow: hidden;
-    font-family: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, sans-serif;
+    font-family: 'Jost', sans-serif;
   }
 
-  @media (min-width: 1024px) {
-    .gg-banner {
-      height: 878px;
-    }
-  }
-
-  /* SVG illustration positioned to cover right side of banner */
+  /* SVG illustration positioned to cover entire background */
   .gg-banner__illustration {
     position: absolute;
-    right: 0;
     top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
+    z-index: 0;
   }
 
-  /* SVG image styling */
+  /* SVG image covers full banner */
   .gg-banner__svg {
-    position: absolute;
-    right: 0;
-    top: 0;
+    width: 100%;
     height: 100%;
-    width: auto;
     object-fit: cover;
+    object-position: center top;
   }
 
-  /* Content block — left side of banner */
+  /* Content block — left side, sits above illustration */
   .gg-banner__content {
     position: absolute;
-    left: 5%;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 90%;
-    max-width: 483px;
+    left: 67px;
+    bottom: 150px;
+    width: 500px;
     z-index: 2;
-  }
-
-  @media (min-width: 1024px) {
-    .gg-banner__content {
-      left: 67px;
-      top: 430px;
-      transform: none;
-      width: 483px;
-    }
+    background: rgba(255, 255, 255, 0.85);
+    padding: 20px;
   }
 
   /* Title styling — 70px Jost Medium as per Figma */
   .gg-banner__title {
-    font-family: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, sans-serif;
+    font-family: 'Jost', sans-serif;
     font-weight: 500;
-    font-size: clamp(2rem, 8vw, 70px);
+    font-size: 70px;
     line-height: 100%;
     color: #000000;
-    margin: 0 0 1.25rem 0;
+    margin: 0 0 20px 0;
   }
 
   /* Subtitle styling — 20px Jost Regular as per Figma */
   .gg-banner__subtitle {
-    font-family: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, sans-serif;
+    font-family: 'Jost', sans-serif;
     font-weight: 400;
-    font-size: clamp(1rem, 3vw, 20px);
+    font-size: 20px;
     line-height: 140%;
     color: #000000;
-    margin: 0 0 1.875rem 0;
-    max-width: 483px;
+    margin: 0 0 30px 0;
   }
 
-  /* SHOP NOW button — black with white text and arrow */
+  /* SHOP NOW button */
   .gg-banner__btn {
     display: inline-flex;
     align-items: center;
     background: #000000;
     color: #FFFFFF;
-    font-family: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, sans-serif;
+    font-family: 'Jost', sans-serif;
     font-weight: 400;
-    font-size: clamp(14px, 2vw, 16px);
+    font-size: 16px;
     text-transform: uppercase;
     text-decoration: none;
-    padding: 0.9375rem 1.875rem;
-    max-width: 220px;
+    padding: 15px 30px;
+    width: 220px;
     height: 50px;
     box-sizing: border-box;
     letter-spacing: 1px;
-    border: 2px solid #000000;
-    transition: all 0.3s ease;
-    cursor: pointer;
   }
 
-  .gg-banner__btn:hover,
-  .gg-banner__btn:focus {
-    background: #FFFFFF;
-    color: #000000;
-  }
-
-  .gg-banner__btn:active {
-    transform: scale(0.98);
-  }
-
-  .gg-banner__btn:focus {
-    outline: 2px solid #000000;
-    outline-offset: 2px;
-  }
-
-  /* Bottom ticker bar — grey background with small text */
+  /* Bottom ticker bar */
   .gg-banner__ticker {
     position: absolute;
     bottom: 0;
@@ -178,34 +92,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 2;
   }
 
   .gg-banner__ticker p {
-    font-family: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, sans-serif;
+    font-family: 'Jost', sans-serif;
     font-weight: 400;
-    font-size: clamp(12px, 2vw, 16px);
+    font-size: 16px;
     color: #000000;
     margin: 0;
     text-align: center;
-    padding: 0 1rem;
-  }
-
-  @media (max-width: 767px) {
-    .gg-banner__ticker {
-      height: auto;
-      padding: 0.75rem 0;
-    }
   }
 </style>
-
-{% schema %}
-{
-  "name": "Gift Guide Banner",
-  "settings": [],
-  "presets": [
-    {
-      "name": "Gift Guide Banner"
-    }
-  ]
-}
-{% endschema %}

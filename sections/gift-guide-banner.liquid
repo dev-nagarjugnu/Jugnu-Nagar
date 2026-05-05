@@ -39,14 +39,14 @@
 
     {% comment %} Top illustration frame {% endcomment %}
     <img
-      src="https://cdn.shopify.com/s/files/1/0787/4730/4121/files/top-banner-frame.png?v=1777978681"
+      src="{{ 'top-banner-frame.png' | asset_url }}"
       alt="Gift guide top illustrations"
       class="gg-banner__img"
     >
 
     {% comment %} Bottom illustration frame {% endcomment %}
     <img
-      src="https://cdn.shopify.com/s/files/1/0787/4730/4121/files/bottom-banner-frame.png?v=1777978681"
+      src="{{ 'bottom-banner-frame.png' | asset_url }}"
       alt="Gift guide bottom illustrations"
       class="gg-banner__img"
     >
@@ -135,6 +135,7 @@
     flex-shrink: 0;
     overflow: hidden;
     background: #FFFFFF;
+    line-height: 0;
   }
 
   /* Each illustration image takes exactly half the height */

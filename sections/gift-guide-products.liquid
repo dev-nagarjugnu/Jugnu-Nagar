@@ -153,7 +153,7 @@
   /* Segmented Controls (Color/Size UI) */
   .qv-option-label { font-family: var(--gg-jost); font-size: 14px; font-weight: 400; color: #333; margin-bottom: 6px; display: block; text-transform: uppercase; }
   .qv-segmented-control { display: flex; border: 1px solid #000; width: 100%; margin-bottom: 15px; height: 38px; }
-  .qv-segment { flex: 1; min-width: 0; padding: 0 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; transition: 0.2s; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .qv-segment { flex: 1; min-width: 0; padding: 0 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; transition: 0.2s; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border: 0; background: transparent; }
   .qv-segment:not(:last-child) { border-right: 1px solid #000; }
   .qv-segment.selected { background: #000; color: #FFF; }
 
@@ -407,6 +407,8 @@
   let currentProduct = null;
   let currentOptions = { option1: null, option2: null, option3: null };
   const BONUS_HANDLE = "{{ section.settings.bonus_product.handle | default: 'soft-winter-jacket' }}";
+  const modalEl = document.getElementById('GGModal');
+  const modalContentEl = document.getElementById('GGModalContent');
 
   function escapeHtml(value) {
     return String(value == null ? '' : value)
@@ -421,29 +423,60 @@
     return String(value == null ? '' : value).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
   }
 
-  function escapeForSingleQuotedJs(value) {
-    return String(value == null ? '' : value)
-      .replace(/\\/g, '\\\\')
-      .replace(/'/g, "\\'");
-  }
-
   function init() {
-    // Modal Triggers
+    // Open modal from product cards
     document.querySelectorAll('.js-open-modal').forEach(btn => {
-      btn.onclick = (e) => {
+      btn.addEventListener('click', (e) => {
         e.preventDefault();
         const handle = btn.getAttribute('data-handle');
         loadProductModal(handle);
-      };
+      });
     });
 
-    // Close Actions
+    // Close modal from overlay/X button
     document.querySelectorAll('.js-close-modal').forEach(btn => {
-      btn.onclick = () => {
-        document.getElementById('GGModal').classList.remove('is-active');
-        document.body.style.overflow = '';
-      };
+      btn.addEventListener('click', closeModal);
     });
+
+    // Event delegation: options + add-to-cart inside injected modal content
+    modalContentEl.addEventListener('click', (event) => {
+      const segment = event.target.closest('.js-qv-segment');
+      if (!segment) return;
+
+      const optionIdx = Number(segment.getAttribute('data-opt-idx'));
+      const optionVal = segment.getAttribute('data-opt-val');
+      if (!optionIdx || optionVal == null) return;
+
+      updateSelection(optionIdx, optionVal);
+    });
+
+    modalContentEl.addEventListener('change', (event) => {
+      const select = event.target.closest('.js-qv-select');
+      if (!select) return;
+
+      const optionIdx = Number(select.getAttribute('data-opt-idx'));
+      if (!optionIdx) return;
+      updateSelection(optionIdx, select.value);
+    });
+
+    modalContentEl.addEventListener('click', (event) => {
+      const atcButton = event.target.closest('.js-qv-atc');
+      if (!atcButton) return;
+
+      const variantId = Number(atcButton.getAttribute('data-variant-id'));
+      if (!variantId) return;
+      addToCart(variantId);
+    });
+  }
+
+  function closeModal() {
+    modalEl.classList.remove('is-active');
+    document.body.style.overflow = '';
+  }
+
+  function updateSelection(idx, val) {
+    currentOptions[`option${idx}`] = val;
+    renderModalUI();
   }
 
   function loadProductModal(handle) {
@@ -459,18 +492,11 @@
     currentOptions.option3 = firstVar.option3;
 
     renderModalUI();
-    document.getElementById('GGModal').classList.add('is-active');
+    modalEl.classList.add('is-active');
     document.body.style.overflow = 'hidden';
   }
 
-  window.updateSelection = (idx, val) => {
-    currentOptions[`option${idx}`] = val;
-    renderModalUI();
-  };
-
   function renderModalUI() {
-    const container = document.getElementById('GGModalContent');
-    
     // Find active variant based on current selections
     const variant = currentProduct.variants.find(v => 
       v.option1 === currentOptions.option1 && 
@@ -502,13 +528,13 @@
         optionsHtml += `<div class="qv-segmented-control">`;
         values.forEach(val => {
           const selectedClass = currentOptions[`option${optIdx}`] === val ? 'selected' : '';
-          optionsHtml += `<div class="qv-segment ${selectedClass}" onclick="updateSelection(${optIdx}, '${escapeForSingleQuotedJs(val)}')">${escapeHtml(val)}</div>`;
+          optionsHtml += `<button type="button" class="qv-segment js-qv-segment ${selectedClass}" data-opt-idx="${optIdx}" data-opt-val="${escapeHtml(val)}">${escapeHtml(val)}</button>`;
         });
         optionsHtml += `</div>`;
       } 
       // OTHERS (Size) as Dropdown
       else {
-        optionsHtml += `<div class="qv-select-wrap"><select class="qv-select" onchange="updateSelection(${optIdx}, this.value)">`;
+        optionsHtml += `<div class="qv-select-wrap"><select class="qv-select js-qv-select" data-opt-idx="${optIdx}">`;
         values.forEach(val => {
           const selectedAttr = currentOptions[`option${optIdx}`] === val ? 'selected' : '';
           optionsHtml += `<option value="${escapeHtml(val)}" ${selectedAttr}>${escapeHtml(val)}</option>`;
@@ -525,7 +551,7 @@
     const safeTitle = escapeHtml(currentProduct.title || '');
     const safeDescription = escapeHtml(truncatedDescription);
 
-    container.innerHTML = `
+    modalContentEl.innerHTML = `
       <div class="qv-header">
         <div class="qv-img-box"><img src="${image}" alt="Product"></div>
         <div class="qv-text-box">
@@ -535,13 +561,13 @@
         </div>
       </div>
       <div class="qv-options-area">${optionsHtml}</div>
-      <button class="qv-atc-btn" onclick="addToCart(${variant.id})">
+      <button type="button" class="qv-atc-btn js-qv-atc" data-variant-id="${variant.id}">
         ADD TO CART <span>&rarr;</span>
       </button>
     `;
   }
 
-  window.addToCart = async (variantId) => {
+  async function addToCart(variantId) {
     const btn = document.querySelector('.qv-atc-btn');
     btn.innerHTML = "ADDING...";
     
@@ -581,7 +607,7 @@
     } catch (err) {
       btn.innerHTML = "ERROR - TRY AGAIN";
     }
-  };
+  }
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

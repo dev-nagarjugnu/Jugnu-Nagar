@@ -286,14 +286,28 @@
 </div>
 
 <script>
-  /** Pure Vanilla JS Initialization **/
-  document.addEventListener('DOMContentLoaded', function() {
-    console.log("Banner initialized with Pixel-Perfect Specs.");
-    const hamburger = document.querySelector('.gg-hamburger');
-    if(hamburger) {
-      hamburger.onclick = () => console.log('Mobile menu active');
+  /**
+   * Banner interactions (vanilla JS only)
+   * Keeps behavior scoped and avoids inline handlers/debug logs.
+   */
+  (function() {
+    function initBanner() {
+      const hamburger = document.querySelector('.gg-hamburger');
+      if (!hamburger) return;
+
+      // Lightweight state toggle for future mobile nav wiring.
+      hamburger.addEventListener('click', function() {
+        const isActive = hamburger.classList.toggle('is-active');
+        hamburger.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+      });
     }
-  });
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initBanner);
+    } else {
+      initBanner();
+    }
+  })();
 </script>
 
 {% schema %}

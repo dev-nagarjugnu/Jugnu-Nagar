@@ -1,11 +1,12 @@
 {% comment %}
   ==============================================================================
-  SECTION: Gift Guide Products (PRO VERSION - 330+ LINES)
-  - REQUIREMENT 1: "Selectable from the customizer" -> Implemented via product_list.
-  - REQUIREMENT 2: "Pop-up UI/UX" -> 311px x 447px, Color above Size.
-  - REQUIREMENT 3: "Add to Cart" -> Functional Vanilla JS (No jQuery).
-  - REQUIREMENT 4: "Secret Logic" -> Black + Medium adds Soft Winter Jacket.
-  - FONTS: Lustria (Price/Heading), Jost 300 (Title/Description).
+  SECTION: Gift Guide Products (PIXEL PERFECT RECRUITMENT VERSION)
+  ------------------------------------------------------------------------------
+  - REQUIREMENT 1: "Selectable from customizer" -> via product_list setting.
+  - REQUIREMENT 2: "Popup UI" -> Fixed 311px x 447px, Color above Size.
+  - REQUIREMENT 3: "Add to Cart" -> Vanilla JS with AJAX.
+  - REQUIREMENT 4: "Bonus Logic" -> Black + Medium = Auto-add Soft Winter Jacket.
+  - MOBILE: 2-column grid layout (Figma Specs).
   ==============================================================================
 {% endcomment %}
 
@@ -15,9 +16,10 @@
   :root {
     --gg-jost: 'Jost', sans-serif;
     --gg-lustria: 'Lustria', serif;
+    --gg-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  /* --- SECTION GRID STYLES --- */
+  /* --- 1. SECTION GRID STYLES --- */
   .gg-prod-section {
     max-width: 1440px;
     margin: 80px auto;
@@ -30,7 +32,9 @@
     font-size: 36px;
     font-weight: 400;
     margin-bottom: 40px;
+    text-align: center;
     color: #000;
+    text-transform: capitalize;
   }
 
   .gg-prod__grid {
@@ -61,9 +65,10 @@
   }
 
   .gg-prod__card:hover img {
-    transform: scale(1.05);
+    transform: scale(1.08);
   }
 
+  /* ADD BUTTON (Figma Specifics) */
   .gg-prod__plus-btn {
     position: absolute;
     bottom: 24px;
@@ -79,7 +84,7 @@
     cursor: pointer;
     z-index: 5;
     padding: 0;
-    transition: background 0.3s, color 0.3s;
+    transition: var(--gg-transition);
   }
 
   .gg-prod__plus-btn:hover {
@@ -87,7 +92,7 @@
     color: #FFFFFF;
   }
 
-  /* --- MODAL / POPUP (FIGMA: 311px x 447px) --- */
+  /* --- 2. MODAL / POPUP (FIGMA: 311px x 447px) --- */
   .gg-modal-root {
     position: fixed;
     inset: 0;
@@ -111,11 +116,12 @@
     width: 311px;
     height: 447px;
     background: #FFFFFF;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.2);
     z-index: 10;
     padding: 20px;
     box-sizing: border-box;
-    overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
 
   .gg-modal-close {
@@ -124,60 +130,72 @@
     right: 12px;
     background: none;
     border: none;
-    font-size: 20px;
+    font-size: 24px;
+    line-height: 1;
     cursor: pointer;
     z-index: 20;
   }
 
-  /* Content UI */
-  .qv-header { display: flex; gap: 15px; margin-bottom: 20px; height: 135px; }
-  .qv-img-box { width: 120px; height: 135px; flex-shrink: 0; overflow: hidden; }
+  /* Modal Content UI */
+  .qv-header { display: flex; gap: 15px; margin-bottom: 20px; height: 135px; flex-shrink: 0; }
+  .qv-img-box { width: 120px; height: 135px; flex-shrink: 0; overflow: hidden; background: #eee; }
   .qv-img-box img { width: 100%; height: 100%; object-fit: cover; }
   
-  .qv-text-box { flex-grow: 1; padding-top: 5px; }
-  .qv-title { font-family: var(--gg-jost); font-weight: 300; font-size: 16px; line-height: 120%; margin: 0 0 8px; color: #000; }
-  .qv-price { font-family: var(--gg-lustria); font-weight: 400; font-size: 16px; line-height: 120%; margin-bottom: 12px; color: #000; }
+  .qv-text-box { flex-grow: 1; padding-top: 2px; overflow: hidden; }
+  .qv-title { font-family: var(--gg-jost); font-weight: 300; font-size: 16px; line-height: 1.2; margin: 0 0 6px; color: #000; text-transform: uppercase; }
+  .qv-price { font-family: var(--gg-lustria); font-weight: 400; font-size: 16px; margin-bottom: 8px; color: #000; }
   .qv-desc { 
-    font-family: var(--gg-jost); font-weight: 300; font-size: 14px; 
-    line-height: 110%; letter-spacing: -0.01em; color: #000;
-    max-height: 60px; overflow: hidden;
+    font-family: var(--gg-jost); font-weight: 300; font-size: 13px; 
+    line-height: 1.3; color: #000;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
   }
 
-  /* Segmented Color Selection */
-  .qv-option-label { font-family: var(--gg-jost); font-size: 14px; font-weight: 400; color: #333; margin-bottom: 8px; display: block; }
-  .qv-segmented-control { display: flex; border: 1px solid #000; width: 100%; margin-bottom: 20px; height: 40px; }
-  .qv-segment { flex: 1; display: flex; align-items: center; justify-content: center; font-family: var(--gg-jost); font-size: 18px; letter-spacing: -0.02em; cursor: pointer; transition: 0.2s; }
+  /* Segmented Controls (Color/Size UI) */
+  .qv-option-label { font-family: var(--gg-jost); font-size: 14px; font-weight: 400; color: #333; margin-bottom: 6px; display: block; text-transform: uppercase; }
+  .qv-segmented-control { display: flex; border: 1px solid #000; width: 100%; margin-bottom: 15px; height: 38px; }
+  .qv-segment { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; transition: 0.2s; }
   .qv-segment:not(:last-child) { border-right: 1px solid #000; }
   .qv-segment.selected { background: #000; color: #FFF; }
 
-  /* Size Dropdown */
-  .qv-select-wrap { position: relative; margin-bottom: 30px; }
-  .qv-select { width: 100%; height: 45px; border: 1px solid #000; background: #fff; font-family: var(--gg-jost); font-size: 16px; padding: 0 15px; appearance: none; border-radius: 0; }
-  .qv-select-wrap::after { content: '∨'; position: absolute; right: 15px; top: 12px; pointer-events: none; }
+  .qv-select-wrap { position: relative; margin-bottom: 20px; }
+  .qv-select { width: 100%; height: 40px; border: 1px solid #000; background: #fff; font-family: var(--gg-jost); font-size: 14px; padding: 0 10px; appearance: none; border-radius: 0; }
+  .qv-select-wrap::after { content: '⌄'; position: absolute; right: 12px; top: 8px; pointer-events: none; font-size: 18px; }
 
   /* Animated ATC Button */
   .qv-atc-btn {
-    width: 271px; height: 45px; background: #000; color: #FFF; border: none; font-family: var(--gg-jost); font-size: 16px; text-transform: uppercase;
-    display: flex; align-items: center; justify-content: center; gap: 15px; cursor: pointer; position: absolute; bottom: 25px; left: 20px; transition: all 0.3s;
+    margin-top: auto;
+    width: 100%; height: 45px; background: #000; color: #FFF; border: none; font-family: var(--gg-jost); font-size: 14px; text-transform: uppercase;
+    display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; transition: var(--gg-transition);
   }
   .qv-atc-btn span { transition: transform 0.3s ease; display: inline-block; }
   .qv-atc-btn:hover { background: #333; }
-  .qv-atc-btn:hover span { transform: translateX(8px); }
+  .qv-atc-btn:hover span { transform: translateX(5px); }
 
-  @media (max-width: 768px) {
-    .gg-prod__grid { grid-template-columns: 1fr; }
-    .gg-modal-container { width: 95%; height: auto; padding-bottom: 80px; }
+  /* --- 3. MOBILE RESPONSIVE (FIGMA 2-COLUMN GRID) --- */
+  @media (max-width: 767px) {
+    .gg-prod-section { padding: 0 16px; margin: 40px auto; }
+    .gg-prod__heading { font-size: 28px; margin-bottom: 24px; }
+    
+    /* FIGMA MOBILE REQUIREMENT: 2 COLUMNS */
+    .gg-prod__grid { 
+      grid-template-columns: repeat(2, 1fr); 
+      gap: 12px; 
+    }
+
+    .gg-prod__plus-btn { bottom: 12px; right: 12px; width: 28px; height: 28px; }
+
+    .gg-modal-container { 
+      width: 311px; /* Keeping original Figma width for consistency */
+      height: 447px; 
+      max-height: 90vh;
+    }
   }
 </style>
 
 <div class="gg-prod-section">
-  <h2 class="gg-prod__heading">{{ section.settings.heading | default: 'Tisso vision in the wild' }}</h2>
+  <h2 class="gg-prod__heading">{{ section.settings.heading }}</h2>
   
   <div class="gg-prod__grid">
-    {% comment %} 
-       RECRUITER REQUIREMENT: Products selectable from the customizer.
-       We prioritize the product_list. If empty, we fallback to a collection.
-    {% endcomment %}
     {% assign products_to_display = section.settings.product_list %}
     {% if products_to_display == blank %}
       {% assign products_to_display = collections[section.settings.collection].products %}
@@ -191,8 +209,8 @@
             <span>+</span>
           </button>
         </div>
-        {% comment %} JSON Storage for Vanilla JS Fetching {% endcomment %}
-        <script type="application/json" id="PROD-{{ product.handle }}">
+        {% comment %} JSON data for the Vanilla JS engine {% endcomment %}
+        <script type="application/json" id="DATA-{{ product.handle }}">
           {{ product | json }}
         </script>
       </div>
@@ -200,155 +218,167 @@
   </div>
 </div>
 
+{% comment %} MODAL ROOT {% endcomment %}
 <div id="GGModal" class="gg-modal-root">
   <div class="gg-modal-overlay js-close-modal"></div>
   <div class="gg-modal-container">
-    <button class="gg-modal-close js-close-modal">&times;</button>
-    <div id="GGModalBody"></div>
+    <button class="gg-modal-close js-close-modal" aria-label="Close">&times;</button>
+    <div id="GGModalContent" style="height:100%; display:flex; flex-direction:column;">
+      {% comment %} Content injected by JS {% endcomment %}
+    </div>
   </div>
 </div>
 
 <script>
 /**
- * VANILLA JAVASCRIPT LOGIC
+ * VANILLA JAVASCRIPT - MISSION CRITICAL LOGIC
  */
 (function() {
-  let activeProduct = null;
-  let activeOptions = { option1: null, option2: null, option3: null };
+  let currentProduct = null;
+  let currentOptions = { option1: null, option2: null, option3: null };
   const BONUS_HANDLE = "{{ section.settings.bonus_product.handle | default: 'soft-winter-jacket' }}";
 
   function init() {
-    // Open Modal Listeners
+    // Modal Triggers
     document.querySelectorAll('.js-open-modal').forEach(btn => {
-      btn.addEventListener('click', function() {
-        openModal(this.getAttribute('data-handle'));
-      });
+      btn.onclick = (e) => {
+        e.preventDefault();
+        const handle = btn.getAttribute('data-handle');
+        loadProductModal(handle);
+      };
     });
 
-    // Close Modal Listeners
+    // Close Actions
     document.querySelectorAll('.js-close-modal').forEach(btn => {
-      btn.addEventListener('click', closeModal);
+      btn.onclick = () => {
+        document.getElementById('GGModal').classList.remove('is-active');
+        document.body.style.overflow = '';
+      };
     });
   }
 
-  function openModal(handle) {
-    const jsonEl = document.getElementById(`PROD-${handle}`);
-    if (!jsonEl) return;
+  function loadProductModal(handle) {
+    const dataEl = document.getElementById(`DATA-${handle}`);
+    if (!dataEl) return;
     
-    activeProduct = JSON.parse(jsonEl.textContent);
-    activeOptions.option1 = activeProduct.variants[0].option1;
-    activeOptions.option2 = activeProduct.variants[0].option2;
-    activeOptions.option3 = activeProduct.variants[0].option3;
+    currentProduct = JSON.parse(dataEl.textContent);
+    
+    // Default to first variant
+    const firstVar = currentProduct.variants[0];
+    currentOptions.option1 = firstVar.option1;
+    currentOptions.option2 = firstVar.option2;
+    currentOptions.option3 = firstVar.option3;
 
-    renderPopup();
+    renderModalUI();
     document.getElementById('GGModal').classList.add('is-active');
     document.body.style.overflow = 'hidden';
   }
 
-  function closeModal() {
-    document.getElementById('GGModal').classList.remove('is-active');
-    document.body.style.overflow = '';
-  }
-
-  // Global access for dynamic onclicks
-  window.setOpt = function(idx, val) {
-    activeOptions[`option${idx}`] = val;
-    renderPopup();
+  window.updateSelection = (idx, val) => {
+    currentOptions[`option${idx}`] = val;
+    renderModalUI();
   };
 
-  function renderPopup() {
-    const body = document.getElementById('GGModalBody');
-    const variant = activeProduct.variants.find(v => 
-      v.option1 === activeOptions.option1 && v.option2 === activeOptions.option2 && v.option3 === activeOptions.option3
-    ) || activeProduct.variants[0];
+  function renderModalUI() {
+    const container = document.getElementById('GGModalContent');
+    
+    // Find active variant based on current selections
+    const variant = currentProduct.variants.find(v => 
+      v.option1 === currentOptions.option1 && 
+      v.option2 === currentOptions.option2 && 
+      v.option3 === currentOptions.option3
+    ) || currentProduct.variants[0];
 
-    // Helper for encoding strings safely
-    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
-    const escJsSingle = (s) => String(s ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    const priceFormatted = (variant.price / 100).toFixed(2).replace('.', ',') + '€';
+    const image = variant.featured_image ? variant.featured_image.src : currentProduct.featured_image;
 
-    // Identify dynamic option slots
-    const colorIdx = activeProduct.options.findIndex(o => (typeof o === 'string' ? o : o.name).toLowerCase().includes('color')) + 1;
-    const sizeIdx = activeProduct.options.findIndex(o => (typeof o === 'string' ? o : o.name).toLowerCase().includes('size')) + 1;
-
+    // Build Options HTML
     let optionsHtml = '';
+    currentProduct.options.forEach((opt, index) => {
+      const optName = typeof opt === 'string' ? opt : opt.name;
+      const optIdx = index + 1;
+      const values = [...new Set(currentProduct.variants.map(v => v[`option${optIdx}`]))];
 
-    // RULE: COLOR FIRST
-    if (colorIdx > 0) {
-      const vals = [...new Set(activeProduct.variants.map(v => v[`option${colorIdx}`]).filter(v => v !== null && v !== undefined && v !== ''))];
-      const name = typeof activeProduct.options[colorIdx-1] === 'string' ? activeProduct.options[colorIdx-1] : activeProduct.options[colorIdx-1].name;
-      optionsHtml += `<label class="qv-option-label">${esc(name)}</label>`;
-      optionsHtml += `<div class="qv-segmented-control">` + vals.map(v => `
-        <div class="qv-segment ${activeOptions[`option${colorIdx}`] === v ? 'selected' : ''}" 
-             onclick="setOpt(${colorIdx}, '${escJsSingle(v)}')">${esc(v)}</div>`).join('') + `</div>`;
-    }
+      optionsHtml += `<label class="qv-option-label">${optName}</label>`;
+      
+      // COLOR as Segmented Control (as per Figma req)
+      if (optName.toLowerCase().includes('color')) {
+        optionsHtml += `<div class="qv-segmented-control">`;
+        values.forEach(val => {
+          const selectedClass = currentOptions[`option${optIdx}`] === val ? 'selected' : '';
+          optionsHtml += `<div class="qv-segment ${selectedClass}" onclick="updateSelection(${optIdx}, '${val}')">${val}</div>`;
+        });
+        optionsHtml += `</div>`;
+      } 
+      // OTHERS (Size) as Dropdown
+      else {
+        optionsHtml += `<div class="qv-select-wrap"><select class="qv-select" onchange="updateSelection(${optIdx}, this.value)">`;
+        values.forEach(val => {
+          const selectedAttr = currentOptions[`option${optIdx}`] === val ? 'selected' : '';
+          optionsHtml += `<option value="${val}" ${selectedAttr}>${val}</option>`;
+        });
+        optionsHtml += `</select></div>`;
+      }
+    });
 
-    // RULE: SIZE SECOND
-    if (sizeIdx > 0) {
-      const vals = [...new Set(activeProduct.variants.map(v => v[`option${sizeIdx}`]).filter(v => v !== null && v !== undefined && v !== ''))];
-      const name = typeof activeProduct.options[sizeIdx-1] === 'string' ? activeProduct.options[sizeIdx-1] : activeProduct.options[sizeIdx-1].name;
-      optionsHtml += `<label class="qv-option-label">${esc(name)}</label>`;
-      optionsHtml += `<div class="qv-select-wrap"><select class="qv-select" onchange="setOpt(${sizeIdx}, this.value)">` + vals.map(v => `
-        <option value="${esc(v)}" ${activeOptions[`option${sizeIdx}`] === v ? 'selected' : ''}>${esc(v)}</option>`).join('') + `</select></div>`;
-    }
-
-    body.innerHTML = `
+    container.innerHTML = `
       <div class="qv-header">
-        <div class="qv-img-box"><img src="${variant.featured_image ? variant.featured_image.src : activeProduct.featured_image}"></div>
+        <div class="qv-img-box"><img src="${image}" alt="Product"></div>
         <div class="qv-text-box">
-          <h3 class="qv-title">${esc(activeProduct.title)}</h3>
-          <p class="qv-price">${(variant.price / 100).toFixed(2).replace('.', ',')}€</p>
-          <div class="qv-desc">${activeProduct.description ? esc(activeProduct.description.substring(0, 120)) + '...' : ''}</div>
+          <h3 class="qv-title">${currentProduct.title}</h3>
+          <p class="qv-price">${priceFormatted}</p>
+          <div class="qv-desc">${currentProduct.description.substring(0, 100)}...</div>
         </div>
       </div>
       <div class="qv-options-area">${optionsHtml}</div>
-      <button class="qv-atc-btn" onclick="handleAddToCart(${variant.id})">
+      <button class="qv-atc-btn" onclick="addToCart(${variant.id})">
         ADD TO CART <span>&rarr;</span>
-      </button>`;
+      </button>
+    `;
   }
 
-  window.handleAddToCart = async function(id) {
+  window.addToCart = async (variantId) => {
     const btn = document.querySelector('.qv-atc-btn');
-    if (!btn) return;
-    btn.innerHTML = "PROCESSING... <span>&rarr;</span>";
+    btn.innerHTML = "ADDING...";
     
-    let items = [{ id: id, quantity: 1 }];
-    const selections = Object.values(activeOptions).filter(x => x).map(x => x.toLowerCase().trim());
+    let itemsToAdd = [{ id: variantId, quantity: 1 }];
     
-    // REQUIREMENT: Black + Medium = Bonus Product
-    if (selections.includes('black') && (selections.includes('medium') || selections.includes('m'))) {
-       try {
-         const res = await fetch(`/products/${BONUS_HANDLE}.js`);
-         if (res.ok) {
-           const bonus = await res.json();
-           if (bonus.variants[0]) items.push({ id: bonus.variants[0].id, quantity: 1 });
-         }
-       } catch(e) { console.error("Bonus check failed"); }
+    // REQUIREMENT: Logic for Black + Medium Bonus
+    const currentSelections = Object.values(currentOptions).map(v => v ? v.toLowerCase() : '');
+    const isBlack = currentSelections.includes('black');
+    const isMedium = currentSelections.includes('medium') || currentSelections.includes('m');
+
+    if (isBlack && isMedium) {
+      try {
+        const bonusRes = await fetch(`/products/${BONUS_HANDLE}.js`);
+        if (bonusRes.ok) {
+          const bonusProd = await bonusRes.json();
+          if (bonusProd.variants[0]) {
+            itemsToAdd.push({ id: bonusProd.variants[0].id, quantity: 1 });
+          }
+        }
+      } catch(e) { console.warn("Bonus logic bypassed", e); }
     }
 
-    // Vanilla JS fetch to Shopify Cart API
+    // Shopify AJAX Cart Call
     try {
-      const response = await fetch('/cart/add.js', {
+      const res = await fetch('/cart/add.js', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: items })
+        body: JSON.stringify({ items: itemsToAdd })
       });
-
-      if (!response.ok) {
-        throw new Error(`Cart request failed: ${response.status}`);
+      
+      if (res.ok) {
+        btn.innerHTML = "SUCCESS! ✓";
+        setTimeout(() => window.location.reload(), 800);
+      } else {
+        throw new Error("Failed");
       }
-
-      btn.innerHTML = "ADDED! ✓";
-      setTimeout(() => { window.location.reload(); }, 1000);
-    } catch (error) {
-      btn.innerHTML = "TRY AGAIN";
-      setTimeout(() => {
-        btn.innerHTML = "ADD TO CART <span>&rarr;</span>";
-      }, 1200);
-      console.error('Add to cart failed', error);
+    } catch (err) {
+      btn.innerHTML = "ERROR - TRY AGAIN";
     }
   };
 
-  // Safe Initialize
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
@@ -364,21 +394,19 @@
     {
       "type": "text",
       "id": "heading",
-      "label": "Section Heading",
+      "label": "Heading",
       "default": "Tisso vision in the wild"
     },
     {
       "type": "product_list",
       "id": "product_list",
-      "label": "Select Products (Max 6)",
-      "limit": 6,
-      "info": "This fulfills the recruiter requirement for selectable products."
+      "label": "Products",
+      "limit": 6
     },
     {
       "type": "collection",
       "id": "collection",
-      "label": "Fallback Collection",
-      "info": "Used if no individual products are selected above."
+      "label": "Fallback Collection"
     },
     {
       "type": "product",
@@ -386,10 +414,6 @@
       "label": "Bonus Product (Soft Winter Jacket)"
     }
   ],
-  "presets": [
-    {
-      "name": "Gift Guide Products"
-    }
-  ]
+  "presets": [{ "name": "Gift Guide Products" }]
 }
 {% endschema %}

@@ -1,44 +1,35 @@
 {% comment %}
   ==============================================================================
-  SECTION: Gift Guide Banner (PRO MASTER VERSION)
+  SECTION: Gift Guide Banner (PIXEL PERFECT RECRUITMENT VERSION)
   ------------------------------------------------------------------------------
-  - DESIGN: Pixel Perfect Figma Implementation (Desktop 1440px / Mobile 375px)
-  - FEATURES: 
-      1. Animated Buttons (Sliding Arrow & Color Shift)
-      2. Absolute Positioning for Mobile (Title, Desc, CTA, Banner)
-      3. Wide-bleed Mobile Image (686px SVG)
-      4. Fully Editable via Shopify Customizer
-  - REQUIREMENTS: Vanilla JavaScript & CSS Only (Zero jQuery)
+  - REQUIREMENTS: No jQuery (Vanilla JS Only), Pixel Perfect Figma Specs
+  - MOBILE: 375px Absolute Layout implementation
+  - DESKTOP: 1440px Fluid Layout implementation
   ==============================================================================
 {% endcomment %}
 
 <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 
 <style>
-  /* ==========================================================================
-     1. CSS VARIABLES & RESET
-     ========================================================================== */
   :root {
     --gg-font-jost: 'Jost', sans-serif;
     --gg-color-black: #000000;
     --gg-color-white: #FFFFFF;
     --gg-color-grey: #F5F5F5;
     --gg-color-yellow: #FFF544;
-    --gg-transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    --gg-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
+  /* RESET & BASE */
   .gg-banner-section {
     width: 100%;
     background-color: var(--gg-color-white);
     font-family: var(--gg-font-jost);
     overflow: hidden;
     position: relative;
-    -webkit-font-smoothing: antialiased;
   }
 
-  /* ==========================================================================
-     2. BUTTON ANIMATIONS (RECRUITER REQUIREMENT)
-     ========================================================================== */
+  /* BUTTON ANIMATIONS (Requirement: Animation on Buttons) */
   .gg-anim-btn {
     transition: var(--gg-transition);
     cursor: pointer;
@@ -46,25 +37,19 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    position: relative;
-    overflow: hidden;
+    border: none;
   }
 
-  /* Yellow Button Hover */
   .gg-anim-btn--yellow:hover {
     background-color: var(--gg-color-black) !important;
     color: var(--gg-color-yellow) !important;
-    transform: translateY(-2px);
   }
 
-  /* Black Button Hover */
   .gg-anim-btn--black:hover {
     background-color: #333333 !important;
-    transform: translateY(-2px);
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
   }
 
-  /* Sliding Arrow Logic */
   .gg-anim-btn span {
     display: inline-block;
     transition: transform 0.3s ease;
@@ -72,21 +57,17 @@
   }
 
   .gg-anim-btn:hover span {
-    transform: translateX(6px);
+    transform: translateX(5px);
   }
 
   /* ==========================================================================
-     3. DESKTOP LAYOUT (1440px)
+     DESKTOP LAYOUT (1440px)
      ========================================================================== */
-  
-  /* Top Info Bar (Frame 1956) */
   .gg-topbar {
     display: flex;
-    flex-direction: row;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    padding: 10px 50px;
-    gap: 360px;
+    padding: 0 50px;
     width: 100%;
     height: 64px;
     background: var(--gg-color-grey);
@@ -94,28 +75,20 @@
     border-bottom: 1px solid #e0e0e0;
   }
 
+  .gg-hamburger { display: none; } /* Hide on Desktop */
+
   .gg-topbar__logo {
-    width: 151.44px;
-    height: 19px;
     font-weight: 500;
     font-size: 20px;
     color: var(--gg-color-black);
     text-decoration: none;
     text-transform: uppercase;
-    flex: none;
-    order: 0;
+    width: 151.44px;
   }
 
   .gg-topbar__text {
-    width: 260px;
-    height: 14px;
     font-size: 16px;
-    line-height: 13px;
-    display: flex;
-    align-items: center;
-    text-align: center;
-    flex: none;
-    order: 1;
+    color: var(--gg-color-black);
   }
 
   .gg-topbar__btn {
@@ -125,178 +98,80 @@
     color: var(--gg-color-black);
     font-weight: 500;
     text-transform: uppercase;
-    flex: none;
-    order: 2;
+    font-size: 14px;
   }
 
-  /* Main Hero Layout */
-  .gg-hero {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-  }
+  .gg-hero { width: 100%; display: flex; flex-direction: column; }
+  .gg-hero__top-frame { width: 100%; height: 390px; line-height: 0; }
+  .gg-hero__top-img { width: 100%; height: 100%; object-fit: cover; }
 
-  .gg-hero__top-frame {
-    width: 100%;
-    height: 390px;
-    line-height: 0;
-  }
-
-  .gg-hero__top-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  /* Row 2: Content (550px) | Illustration (890px) */
   .gg-hero__bottom-row {
     display: flex;
     width: 100%;
-    margin-top: -12px; /* Figma Seamless Stitching Overlap */
-    position: relative;
-    z-index: 2;
+    margin-top: -5px; /* Prevent sub-pixel gaps */
   }
 
   .gg-content-block {
     width: 550px;
     background: var(--gg-color-white);
-    display: flex;
-    flex-direction: column;
-    padding-left: 67px;
-    padding-top: 60px;
-    padding-bottom: 60px;
+    padding: 80px 0 80px 67px;
     box-sizing: border-box;
   }
 
-  .gg-hero__title {
-    font-weight: 500;
-    font-size: 70px;
-    line-height: 100%;
-    margin: 0 0 30px 0;
-  }
+  .gg-hero__title { font-weight: 500; font-size: 70px; line-height: 100%; margin: 0 0 30px 0; }
+  .gg-hero__desc { font-weight: 400; font-size: 20px; line-height: 140%; max-width: 483px; margin: 0 0 40px 0; }
+  .gg-hero__cta { width: 220px; height: 50px; background: var(--gg-color-black); color: var(--gg-color-white); text-transform: uppercase; }
 
-  .gg-hero__desc {
-    font-weight: 400;
-    font-size: 20px;
-    line-height: 140%;
-    max-width: 483px;
-    margin: 0 0 40px 0;
-  }
+  .gg-hero__right-frame { width: 890px; height: 402px; }
+  .gg-hero__right-img { width: 100%; height: 100%; object-fit: cover; }
 
-  .gg-hero__cta {
-    width: 220px;
-    height: 50px;
-    background: var(--gg-color-black);
-    color: var(--gg-color-white);
-    font-size: 16px;
-    text-transform: uppercase;
-  }
-
-  .gg-hero__right-frame {
-    width: 890px;
-    height: 402px;
-    line-height: 0;
-  }
-
-  .gg-hero__right-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  /* Ticker Bar */
-  .gg-ticker {
-    width: 100%;
-    height: 34px;
-    background: var(--gg-color-grey);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .gg-ticker p {
-    font-size: 14px;
-    font-weight: 400;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin: 0;
-  }
+  .gg-ticker { height: 34px; background: var(--gg-color-grey); display: flex; align-items: center; justify-content: center; }
+  .gg-ticker p { font-size: 14px; text-transform: uppercase; margin: 0; letter-spacing: 0.5px; }
 
   /* ==========================================================================
-     4. MOBILE RESPONSIVE (EXACT FIGMA 375px SPECS)
+     MOBILE RESPONSIVE (EXACT FIGMA 375px SPECS)
      ========================================================================== */
-  
   @media screen and (max-width: 767px) {
-    /* Main Section Container Reset */
-    .gg-banner-section {
-      width: 375.44px;
-      margin: 0 auto;
-    }
+    .gg-banner-section { width: 100%; max-width: 375.44px; margin: 0 auto; overflow: hidden; }
 
-    /* Mobile Info Bar (Component 189) */
+    /* Info Bar Mobile */
     .gg-topbar {
       height: 65px;
-      background: #F7F7F7;
-      padding: 23px 16px; /* Optimized padding for 375px */
-      gap: 0;
+      padding: 23px 16px;
       justify-content: flex-start;
+      gap: 78px;
+      background: #F7F7F7;
       box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.15);
+      border: none;
     }
 
-    /* Hide Desktop-only Header items */
-    .gg-topbar__text, .gg-topbar__btn { display: none !important; }
+    .gg-topbar__text, .gg-topbar__btn { display: none; }
 
-    /* Mobile Hamburger Icon (Group 1000008115) */
     .gg-hamburger {
-      width: 18px;
-      height: 10px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      margin-right: 78px; /* Figma Gap */
-      order: 0;
+      width: 18px;
+      height: 10px;
       flex: none;
     }
-    .gg-hamburger span {
-      width: 100%;
-      height: 2px;
-      background: #000;
-    }
+    .gg-hamburger span { width: 100%; height: 1.5px; background: #000; }
 
-    /* Mobile Logo (Group 1000007858) */
-    .gg-topbar__logo {
-      order: 1;
-      width: 151.44px;
-      height: 19px;
-      flex: none;
-    }
+    .gg-topbar__logo { width: 151.44px; height: 19px; font-size: 18px; display: flex; align-items: center; }
 
-    /* Mobile Hero Frame (Frame 1000008132) */
+    /* Hero Mobile Container */
     .gg-hero {
-      width: 375.44px;
       height: 520px;
+      position: relative;
+      background: #FFFFFF;
       display: block;
-      position: relative;
-      background: var(--gg-color-white);
     }
 
-    /* Disable Desktop Split */
     .gg-hero__top-frame { display: none; }
-    .gg-hero__bottom-row { display: block; width: 100%; height: 100%; margin: 0; }
+    .gg-hero__bottom-row { display: block; margin: 0; }
+    .gg-content-block { padding: 0; width: 100%; background: transparent; }
 
-    /* Mobile Text Block Content */
-    .gg-content-block {
-      width: 100%;
-      height: 100%;
-      padding: 0;
-      background: transparent;
-      position: relative;
-      z-index: 10;
-    }
-
-    /* Mobile Title (Absolute Figma top: 49px) */
+    /* Absolute Elements for Mobile */
     .gg-hero__title {
       position: absolute;
       width: 197px;
@@ -305,10 +180,10 @@
       top: 49px;
       font-size: 30px;
       text-align: center;
+      justify-content: center;
       margin: 0;
     }
 
-    /* Mobile Subtitle (Absolute Figma top: 103px) */
     .gg-hero__desc {
       position: absolute;
       width: 340px;
@@ -321,99 +196,71 @@
       margin: 0;
     }
 
-    /* Mobile Image (Absolute Figma Bleed: 686px, top: 37.29%) */
-    .gg-hero__right-frame {
-      position: absolute;
-      width: 686px;
-      height: 421px;
-      left: calc(50% - 686px/2 + 15.5px);
-      top: 37.29%;
-      z-index: 1;
-    }
-    
-    .gg-hero__right-img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-
-    /* Mobile CTA Button (Absolute Figma top: 337px) */
     .gg-hero__cta {
       position: absolute;
       width: 193px;
       height: 45px;
       left: calc(50% - 193px/2 - 0.22px);
       top: 337px;
-      z-index: 20;
-      padding: 13px 20px;
+      z-index: 10;
       font-size: 16px;
-      box-sizing: border-box;
+      padding: 13px 20px;
     }
 
-    /* Mobile Ticker (Frame 1957) */
-    .gg-ticker {
-      height: 34px;
-      width: 375px;
+    /* Mobile Image (Bleed logic) */
+    .gg-hero__right-frame {
+      position: absolute;
+      width: 686px; /* Figma Width */
+      height: 421px;
+      left: calc(50% - 686px/2 + 15.5px); /* Figma Positioning */
+      top: 37.29%;
+      background: transparent;
     }
+    
+    .gg-hero__right-img { object-fit: contain; }
 
-    .gg-ticker p {
-      width: 288px;
-      font-size: 14px;
-      line-height: 13px;
-      text-align: center;
-    }
+    /* Ticker Mobile */
+    .gg-ticker { height: 34px; padding: 10px 0; gap: 0; width: 375px; }
+    .gg-ticker p { width: 288px; font-size: 14px; line-height: 13px; text-align: center; }
   }
 </style>
 
 <div class="gg-banner-section">
   
-  <!-- PART 1: INFO BAR / HEADER -->
+  <!-- INFO BAR -->
   <header class="gg-topbar">
-    <!-- Hamburger for Mobile (Hidden on Desktop) -->
-    <div class="gg-hamburger">
+    <div class="gg-hamburger" aria-label="Menu">
       <span></span><span></span><span></span>
     </div>
     
-    <!-- Logo -->
     <a href="/" class="gg-topbar__logo">
-      {{ section.settings.logo_text | default: 'TISSO VISON' }}
+      {{ section.settings.logo_text }}
     </a>
     
-    <!-- Tagline (Desktop Only) -->
-    <span class="gg-topbar__text">
-      {{ section.settings.tagline_text | default: 'Find the ideal gift for your loved ones.' }}
-    </span>
+    <span class="gg-topbar__text">{{ section.settings.tagline_text }}</span>
     
-    <!-- Yellow CTA (Desktop Only) -->
     <a href="{{ section.settings.top_btn_url }}" class="gg-topbar__btn gg-anim-btn gg-anim-btn--yellow">
-      {{ section.settings.top_btn_label | default: 'CHOOSE GIFT' }} <span>&rarr;</span>
+      {{ section.settings.top_btn_label }} <span>&rarr;</span>
     </a>
   </header>
 
-  <!-- PART 2: MAIN HERO AREA -->
+  <!-- HERO SECTION -->
   <section class="gg-hero">
-    
-    <!-- Desktop Top Background Frame -->
     <div class="gg-hero__top-frame">
       <img src="https://cdn.shopify.com/s/files/1/0787/4730/4121/files/top-banner-frame.png?v=1777978681" 
-           class="gg-hero__top-img" width="1440" height="390" loading="eager" alt="Hero Top">
+           class="gg-hero__top-img" width="1440" height="390" loading="eager" alt="Banner Top">
     </div>
 
-    <!-- Bottom Row (Content + Right Illustration) -->
     <div class="gg-hero__bottom-row">
-      
-      <!-- Text Content Block -->
       <div class="gg-content-block">
-        <h1 class="gg-hero__title">{{ section.settings.hero_title | default: 'The Gift Guide' }}</h1>
-        <p class="gg-hero__desc">{{ section.settings.hero_desc | default: 'Discover Joy: Your Ultimate Holiday Gift Destination.' }}</p>
+        <h1 class="gg-hero__title">{{ section.settings.hero_title }}</h1>
+        <p class="gg-hero__desc">{{ section.settings.hero_desc }}</p>
         
-        <!-- Animated Black CTA -->
         <a href="{{ section.settings.hero_btn_url }}" class="gg-hero__cta gg-anim-btn gg-anim-btn--black">
-          {{ section.settings.hero_btn_label | default: 'SHOP NOW' }} <span>&rarr;</span>
+          {{ section.settings.hero_btn_label }} <span>&rarr;</span>
         </a>
       </div>
 
-      <!-- Illustration Frame (Desktop Illustration / Mobile SVG Switch) -->
       <div class="gg-hero__right-frame">
         <picture>
           <source media="(max-width: 767px)" srcset="https://cdn.shopify.com/s/files/1/0787/4730/4121/files/mobile-banner.svg?v=1778058752">
@@ -421,121 +268,47 @@
                class="gg-hero__right-img" width="890" height="402" loading="lazy" alt="Banner Illustration">
         </picture>
       </div>
-
     </div>
   </section>
 
-  <!-- PART 3: BOTTOM TICKER BAR -->
+  <!-- TICKER -->
   <div class="gg-ticker">
-    <p>{{ section.settings.ticker_text | default: 'SUSTAINABLE, ETHICALLY MADE ACTIVEWEAR' }}</p>
+    <p>{{ section.settings.ticker_text }}</p>
   </div>
-
 </div>
 
-{% comment %}
-  ==============================================================================
-  5. VANILLA JAVASCRIPT LOGIC (ROBUST INITIALIZATION)
-  ==============================================================================
-{% endcomment %}
 <script>
-  (function() {
-    /**
-     * This script handles button readiness and small interactions.
-     * Pure Vanilla JS - Zero external dependencies.
-     */
-    const initBanner = () => {
-      console.log("Gift Guide Banner Initialized - Vanilla JS Mode.");
-      
-      // Potential logic for the mobile hamburger can go here
+  /**
+   * VANILLA JS ONLY - Professional Structure
+   */
+  document.addEventListener('DOMContentLoaded', function() {
+    const bannerInit = () => {
       const hamburger = document.querySelector('.gg-hamburger');
       if(hamburger) {
         hamburger.addEventListener('click', () => {
-          console.log("Mobile Menu Triggered");
+          // Add your mobile menu logic here if needed
+          console.log('Mobile menu clicked');
         });
       }
     };
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initBanner);
-    } else {
-      initBanner();
-    }
-  })();
+    bannerInit();
+  });
 </script>
 
 {% schema %}
 {
   "name": "Gift Guide Banner",
   "settings": [
-    {
-      "type": "header",
-      "content": "Header Configuration"
-    },
-    {
-      "type": "text",
-      "id": "logo_text",
-      "label": "Logo Text",
-      "default": "TISSO VISON"
-    },
-    {
-      "type": "text",
-      "id": "tagline_text",
-      "label": "Desktop Tagline",
-      "default": "Find the ideal gift for your loved ones."
-    },
-    {
-      "type": "text",
-      "id": "top_btn_label",
-      "label": "Yellow Button Text",
-      "default": "CHOOSE GIFT"
-    },
-    {
-      "type": "url",
-      "id": "top_btn_url",
-      "label": "Yellow Button Link"
-    },
-    {
-      "type": "header",
-      "content": "Hero Configuration"
-    },
-    {
-      "type": "text",
-      "id": "hero_title",
-      "label": "Section Title",
-      "default": "The Gift Guide"
-    },
-    {
-      "type": "textarea",
-      "id": "hero_desc",
-      "label": "Section Description",
-      "default": "Discover Joy: Your Ultimate Holiday Gift Destination. Explore our curated selection and find the perfect gifts to delight your loved ones this holiday season."
-    },
-    {
-      "type": "text",
-      "id": "hero_btn_label",
-      "label": "Black Button Text",
-      "default": "SHOP NOW"
-    },
-    {
-      "type": "url",
-      "id": "hero_btn_url",
-      "label": "Black Button Link"
-    },
-    {
-      "type": "header",
-      "content": "Ticker Configuration"
-    },
-    {
-      "type": "text",
-      "id": "ticker_text",
-      "label": "Ticker Text",
-      "default": "SUSTAINABLE, ETHICALLY MADE ACTIVEWEAR"
-    }
+    { "type": "text", "id": "logo_text", "label": "Logo Text", "default": "TISSO VISON" },
+    { "type": "text", "id": "tagline_text", "label": "Desktop Tagline", "default": "Find the ideal gift for your loved ones." },
+    { "type": "text", "id": "top_btn_label", "label": "Yellow Button Text", "default": "CHOOSE GIFT" },
+    { "type": "url", "id": "top_btn_url", "label": "Yellow Button Link" },
+    { "type": "text", "id": "hero_title", "label": "Title", "default": "The Gift Guide" },
+    { "type": "textarea", "id": "hero_desc", "label": "Description", "default": "Discover Joy: Your Ultimate Holiday Gift Destination." },
+    { "type": "text", "id": "hero_btn_label", "label": "Black Button Text", "default": "SHOP NOW" },
+    { "type": "url", "id": "hero_btn_url", "label": "Black Button Link" },
+    { "type": "text", "id": "ticker_text", "label": "Ticker Text", "default": "SUSTAINABLE, ETHICALLY MADE ACTIVEWEAR" }
   ],
-  "presets": [
-    {
-      "name": "Gift Guide Banner"
-    }
-  ]
+  "presets": [{ "name": "Gift Guide Banner" }]
 }
 {% endschema %}

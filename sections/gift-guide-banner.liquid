@@ -1,257 +1,224 @@
 {% comment %}
-  Gift Guide Banner Section
-  - Matches Figma Design (1440px reference)
-  - Includes Top Bar, Main 40/60 Split Banner, and Bottom Ticker
-  - Fixed: Missing image dimensions (Theme-Check error)
-  - Fixed: Image gaps using CSS Grid
+  Gift Guide Banner - Pixel Perfect Figma Implementation
+  - Top Bar: 64px
+  - Top Image: 1440px (Full Width)
+  - Bottom Row: Content (550px) | Bottom Image (890px)
+  - Seamless Stitching: 12px overlap calculated from Figma 'top' values
 {% endcomment %}
 
 <style>
-  /* Import Jost Font from Google Fonts */
   @import url('https://fonts.googleapis.com/css2?family=Jost:wght@400;500&display=swap');
 
-  .gg-wrapper {
+  /* Root reset for the section to ensure edge-to-edge 1440px */
+  .gg-container {
     width: 100%;
-    margin: 0;
-    padding: 0;
+    max-width: 1440px;
+    margin: 0 auto;
     background: #FFFFFF;
+    position: relative;
     overflow: hidden;
-    -webkit-font-smoothing: antialiased;
   }
 
   /* PART 1 - TOP BAR (64px) */
   .gg-topbar {
     height: 64px;
-    background-color: #F5F5F5;
+    background: #F5F5F5;
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding: 0 50px;
-    box-sizing: border-box;
-  }
-
-  .gg-topbar__content {
-    width: 100%;
-    max-width: 1340px;
-    display: flex;
     justify-content: space-between;
-    align-items: center;
+    padding: 0 67px; /* Aligning with button/text left margin */
+    box-sizing: border-box;
   }
 
   .gg-topbar__text {
     font-family: 'Jost', sans-serif;
     font-size: 16px;
-    font-weight: 400;
     color: #000000;
   }
 
   .gg-topbar__btn {
-    background-color: #FFF544;
+    background: #FFF544;
     color: #000000;
     font-family: 'Jost', sans-serif;
     font-size: 16px;
     font-weight: 500;
     text-decoration: none;
-    height: 44px;
-    display: inline-flex;
+    padding: 12px 24px;
+    display: flex;
     align-items: center;
-    padding: 0 20px;
     text-transform: uppercase;
   }
 
-  /* PART 2 - MAIN BANNER (780px) */
-  .gg-banner {
-    display: flex;
-    flex-wrap: nowrap;
+  /* PART 2 - HERO SECTION */
+  .gg-hero {
     width: 100%;
-    height: 780px;
-  }
-
-  /* Left Side: 40% Text */
-  .gg-banner__left {
-    width: 40%;
-    height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    padding-left: 70px;
-    padding-right: 50px;
-    box-sizing: border-box;
   }
 
-  .gg-banner__title {
-    font-family: 'Jost', sans-serif;
-    font-size: 70px;
-    font-weight: 500;
-    line-height: 1.1;
-    margin: 0 0 20px 0;
-    color: #000000;
+  /* Top Image: Full Width 1440px */
+  .gg-hero__top-frame {
+    width: 100%;
+    height: 390px;
+    line-height: 0;
   }
 
-  .gg-banner__subtitle {
-    font-family: 'Jost', sans-serif;
-    font-size: 20px;
-    font-weight: 400;
-    line-height: 1.4;
-    max-width: 483px;
-    margin: 0 0 35px 0;
-    color: #000000;
-  }
-
-  .gg-banner__cta {
-    background-color: #000000;
-    color: #FFFFFF;
-    font-family: 'Jost', sans-serif;
-    font-size: 16px;
-    font-weight: 400;
-    text-decoration: none;
-    width: 220px;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  /* Right Side: 60% Images */
-  .gg-banner__right {
-    width: 60%;
-    height: 100%;
-    display: grid;
-    grid-template-rows: 390px 390px; /* Force exact heights */
-    gap: 0; /* Prevents gaps */
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-  }
-
-  .gg-banner__img {
+  .gg-hero__top-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: top center;
     display: block;
-    margin: 0;
   }
 
-  /* PART 3 - BOTTOM TICKER (34px) */
+  /* Bottom Row: Text Left (550px) | Image Right (890px) */
+  .gg-hero__bottom-row {
+    display: flex;
+    width: 100%;
+    margin-top: -12px; /* Figma overlap: Top ends at 454, Bottom starts at 442 */
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Content Left: 550px */
+  .gg-hero__content {
+    width: 550px;
+    background: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    padding-left: 67px; /* From Figma: left: 67px */
+    padding-top: 47px;  /* Figma Title 489px - Row Start 442px */
+    box-sizing: border-box;
+  }
+
+  .gg-hero__title {
+    font-family: 'Jost', sans-serif;
+    font-weight: 500;
+    font-size: 70px;
+    line-height: 100%;
+    margin: 0 0 50px 0; /* Space to description */
+    color: #000000;
+  }
+
+  .gg-hero__desc {
+    font-family: 'Jost', sans-serif;
+    font-size: 20px;
+    line-height: 140%;
+    max-width: 483px; /* From Figma */
+    margin: 0 0 50px 0; /* Space to CTA */
+    color: #000000;
+  }
+
+  .gg-hero__cta {
+    width: 220px;
+    height: 50px;
+    background: #000000;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-family: 'Jost', sans-serif;
+    font-size: 16px;
+    text-transform: uppercase;
+  }
+
+  /* Image Right: 890px */
+  .gg-hero__bottom-frame {
+    width: 890px;
+    height: 402px;
+    line-height: 0;
+  }
+
+  .gg-hero__bottom-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* PART 3 - TICKER */
   .gg-ticker {
     height: 34px;
-    background-color: #F5F5F5;
+    background: #F5F5F5;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
   }
 
-  .gg-ticker__text {
+  .gg-ticker p {
     font-family: 'Jost', sans-serif;
     font-size: 14px;
-    font-weight: 400;
-    color: #000000;
     margin: 0;
-    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
   }
 
-  /* RESPONSIVE DESIGN */
-  @media (max-width: 1024px) {
-    .gg-banner__title { font-size: 50px; }
-  }
-
-  @media (max-width: 768px) {
-    .gg-topbar { height: auto; padding: 15px 20px; }
-    .gg-topbar__content { flex-direction: column; gap: 10px; text-align: center; }
-    
-    .gg-banner { flex-direction: column; height: auto; }
-    .gg-banner__left { 
-      width: 100%; 
-      padding: 60px 20px; 
-      align-items: center; 
-      text-align: center; 
-    }
-    .gg-banner__right { 
-      width: 100%; 
-      grid-template-rows: 300px 300px; /* Reduced for mobile */
-    }
-    .gg-banner__title { font-size: 42px; }
+  /* MOBILE RESPONSIVE */
+  @media screen and (max-width: 1024px) {
+    .gg-hero__bottom-row { flex-direction: column; margin-top: 0; }
+    .gg-hero__content { width: 100%; padding: 40px 20px; align-items: center; text-align: center; }
+    .gg-hero__bottom-frame { width: 100%; height: auto; }
+    .gg-hero__title { font-size: 48px; }
+    .gg-topbar { padding: 0 20px; }
   }
 </style>
 
-<div class="gg-wrapper">
-  {% comment %} Part 1: Top Bar {% endcomment %}
+<div class="gg-container">
+  
+  <!-- Part 1: Top Bar -->
   <div class="gg-topbar">
-    <div class="gg-topbar__content">
-      <span class="gg-topbar__text">Find the ideal gift for your loved ones.</span>
-      <a href="{{ section.settings.top_bar_link }}" class="gg-topbar__btn">
-        CHOOSE GIFT &nbsp; &rarr;
-      </a>
-    </div>
+    <span class="gg-topbar__text">Find the ideal gift for your loved ones.</span>
+    <a href="{{ section.settings.top_url }}" class="gg-topbar__btn">CHOOSE GIFT &nbsp; &rarr;</a>
   </div>
 
-  {% comment %} Part 2: Main Banner Section {% endcomment %}
-  <div class="gg-banner">
+  <!-- Part 2: Main Hero -->
+  <div class="gg-hero">
     
-    {% comment %} Left side text content {% endcomment %}
-    <div class="gg-banner__left">
-      <h1 class="gg-banner__title">The Gift Guide</h1>
-      <p class="gg-banner__subtitle">
-        Discover Joy: Your Ultimate Holiday Gift Destination. 
-        Explore our curated selection and find the perfect gifts to 
-        delight your loved ones this holiday season.
-      </p>
-      <a href="{{ section.settings.button_link }}" class="gg-banner__cta">
-        SHOP NOW &nbsp; &rarr;
-      </a>
+    <!-- Top Illustration (Full Width) -->
+    <div class="gg-hero__top-frame">
+      <img src="https://cdn.shopify.com/s/files/1/0787/4730/4121/files/top-banner-frame.png?v=1777978681" 
+           alt="Gift Guide Illustration Top" 
+           class="gg-hero__top-img" 
+           width="1440" height="390" loading="eager">
     </div>
 
-    {% comment %} Right side stacked images {% endcomment %}
-    <div class="gg-banner__right">
-      <img 
-        src="https://cdn.shopify.com/s/files/1/0787/4730/4121/files/top-banner-frame.png?v=1777978681" 
-        alt="The Gift Guide Top Banner" 
-        class="gg-banner__img"
-        loading="lazy"
-        width="864"
-        height="390"
-      >
-      <img 
-        src="https://cdn.shopify.com/s/files/1/0787/4730/4121/files/bottom-banner-frame.png?v=1777978681" 
-        alt="The Gift Guide Bottom Banner" 
-        class="gg-banner__img"
-        loading="lazy"
-        width="864"
-        height="390"
-      >
+    <!-- Bottom Row (Split Content/Image) -->
+    <div class="gg-hero__bottom-row">
+      <div class="gg-hero__content">
+        <h1 class="gg-hero__title">The Gift Guide</h1>
+        <p class="gg-hero__desc">
+          Discover Joy: Your Ultimate Holiday Gift Destination. 
+          Explore our curated selection and find the perfect gifts to 
+          delight your loved ones this holiday season.
+        </p>
+        <a href="{{ section.settings.cta_url }}" class="gg-hero__cta">SHOP NOW &nbsp; &rarr;</a>
+      </div>
+
+      <div class="gg-hero__bottom-frame">
+        <img src="https://cdn.shopify.com/s/files/1/0787/4730/4121/files/bottom-banner-frame.png?v=1777978681" 
+             alt="Gift Guide Illustration Bottom" 
+             class="gg-hero__bottom-img" 
+             width="890" height="402" loading="lazy">
+      </div>
     </div>
 
   </div>
 
-  {% comment %} Part 3: Ticker Bar {% endcomment %}
+  <!-- Part 3: Ticker -->
   <div class="gg-ticker">
-    <p class="gg-ticker__text">SUSTAINABLE, ETHICALLY MADE CLOTHES IN SIZES XXS TO 6XL</p>
+    <p>SUSTAINABLE, ETHICALLY MADE CLOTHES IN SIZES XXS TO 6XL</p>
   </div>
+
 </div>
 
 {% schema %}
 {
   "name": "Gift Guide Banner",
   "settings": [
-    {
-      "type": "url",
-      "id": "top_bar_link",
-      "label": "Top Bar Button Link"
-    },
-    {
-      "type": "url",
-      "id": "button_link",
-      "label": "Main CTA Button Link"
-    }
+    { "type": "url", "id": "top_url", "label": "Top Button Link" },
+    { "type": "url", "id": "cta_url", "label": "Shop Now Link" }
   ],
-  "presets": [
-    {
-      "name": "Gift Guide Banner"
-    }
-  ]
+  "presets": [{ "name": "Gift Guide Banner" }]
 }
 {% endschema %}

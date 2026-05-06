@@ -1,575 +1,353 @@
 {% comment %}
   Gift Guide Products Section
-  - Displays "Tisso vison in the wild" heading
-  - Shows 6 products in a 3x2 grid layout matching Figma exactly
-  - Each product has a "+" button that opens a popup
-  - Popup shows product image, name, price, color, size and add to cart
-  - Vanilla JS only — no jQuery used
-  - Font: Lustria for heading, Jost for everything else
+  - Heading: Lustria 36px
+  - Grid: 3x2, 20px gap
+  - Features: Selectable products, Quick-view popup, Automatic bonus product logic
 {% endcomment %}
 
-<div class="gg-products">
+<link href="https://fonts.googleapis.com/css2?family=Lustria&family=Jost:wght@400;500&display=swap" rel="stylesheet">
 
-  {% comment %} Section heading — Lustria font 36px as per Figma {% endcomment %}
-  <h2 class="gg-products__heading">Tisso vison in the wild</h2>
+<div class="gg-products-wrapper">
+  <h2 class="gg-products__heading">{{ section.settings.heading | default: 'Tisso vison in the wild' }}</h2>
 
-  {% comment %} Product grid — 3 columns, 2 rows, gap 20px as per Figma {% endcomment %}
   <div class="gg-products__grid">
-
-    {% comment %} Get products from Gift Guide collection {% endcomment %}
-    {% assign gift_collection = collections['gift-guide'] %}
-
-    {% comment %} Loop through first 6 products only {% endcomment %}
-    {% for product in gift_collection.products limit: 6 %}
-
-      {% comment %} Individual product card {% endcomment %}
+    {%- assign products_to_show = section.settings.product_list -%}
+    
+    {%- for product in products_to_show limit: 6 -%}
       <div class="gg-products__card">
-
-        {% comment %} Product image {% endcomment %}
         <img
-          src="{{ product.featured_image | img_url: '433x444', crop: 'center' }}"
-          alt="{{ product.title }}"
+          src="{{ product.featured_image | img_url: '600x600', crop: 'center' }}"
+          alt="{{ product.title | escape }}"
           class="gg-products__image"
           loading="lazy"
+          width="433"
+          height="444"
         >
-
-        {% comment %} 
-          "+" circular button — triggers popup on click
-          Data attributes pass product info to the popup via JS
-        {% endcomment %}
+        
+        {% comment %} Data passed to JS for the popup {% endcomment %}
         <button
           type="button"
           class="gg-products__plus-btn"
-          aria-label="Quick view {{ product.title | escape }}"
-          data-title="{{ product.title | escape }}"
-          data-price="{{ product.price | money | escape }}"
-          data-image="{{ product.featured_image | img_url: '200x200', crop: 'center' }}"
-          data-variant="{{ product.selected_or_first_available_variant.id }}"
-          data-description="{{ product.description | strip_html | truncate: 100 | escape }}"
-          data-colors="{% for variant in product.variants %}{{ variant.option1 | escape }}{% unless forloop.last %},{% endunless %}{% endfor %}"
-          data-sizes="{% for variant in product.variants %}{{ variant.option2 | escape }}{% unless forloop.last %},{% endunless %}{% endfor %}"
-          data-variant-map="{% for variant in product.variants %}{{ variant.option1 | escape }}|{{ variant.option2 | escape }}:{{ variant.id }}{% unless forloop.last %};{% endunless %}{% endfor %}"
-          data-url="{{ product.url | escape }}"
-          onclick="openGiftPopup(this)"
+          aria-label="Open quick view"
+          data-product-handle="{{ product.handle }}"
+          onclick="initQuickView(this)"
         >
-          +
+          <span>+</span>
         </button>
 
+        {% comment %} JSON data for the specific product logic {% endcomment %}
+        <script type="application/json" id="ProductJson-{{ product.handle }}">
+          {{ product | json }}
+        </script>
       </div>
-
-    {% endfor %}
-
+    {%- endfor -%}
   </div>
-
 </div>
 
-{% comment %} 
-  Product Popup Modal
-  - Single popup reused for all products
-  - Filled dynamically by JS when "+" is clicked
-{% endcomment %}
-<div class="gg-popup__overlay" id="ggPopupOverlay" onclick="closeGiftPopup()">
-  <div class="gg-popup" onclick="event.stopPropagation()">
-
-    {% comment %} Close button top right {% endcomment %}
-    <button id="ggPopupCloseBtn" class="gg-popup__close" onclick="closeGiftPopup()" aria-label="Close popup">&#10005;</button>
-
-    {% comment %} Popup content filled by JS {% endcomment %}
-    <div class="gg-popup__content">
-
-      {% comment %} Left — product image {% endcomment %}
-      <img src="" alt="" class="gg-popup__image" id="ggPopupImage">
-
-      {% comment %} Right — product details {% endcomment %}
-      <div class="gg-popup__details">
-
-        <h3 class="gg-popup__title" id="ggPopupTitle"></h3>
-        <p class="gg-popup__price" id="ggPopupPrice"></p>
-        <p class="gg-popup__description" id="ggPopupDescription"></p>
-
-        {% comment %} Color selector — filled dynamically by JS {% endcomment %}
-        <div class="gg-popup__field">
-          <label class="gg-popup__label">Color</label>
-          <div class="gg-popup__colors" id="ggPopupColors"></div>
-        </div>
-
-        {% comment %} Size selector dropdown {% endcomment %}
-        <div class="gg-popup__field">
-          <label class="gg-popup__label">Size</label>
-          <select class="gg-popup__select" id="ggPopupSize">
-            <option value="">Choose your size</option>
-          </select>
-        </div>
-
-        {% comment %} Add to cart button — black with arrow as per Figma {% endcomment %}
-        <button 
-          type="button"
-          class="gg-popup__atc-btn" 
-          id="ggPopupATCBtn"
-          onclick="addToCartFromPopup()"
-        >
-          ADD TO CART &nbsp; &#8594;
-        </button>
-
-      </div>
+{% comment %} POPUP MODAL {% endcomment %}
+<div id="gg-modal" class="gg-modal">
+  <div class="gg-modal__overlay" onclick="closeGGModal()"></div>
+  <div class="gg-modal__container">
+    <button class="gg-modal__close" onclick="closeGGModal()">&times;</button>
+    <div class="gg-modal__content" id="gg-modal-body">
+      {% comment %} Content dynamically injected by JS {% endcomment %}
     </div>
-
   </div>
 </div>
 
 <style>
-  /* =====================
-     Gift Guide Products
-     Matches Figma Desktop-22 exactly
-  ===================== */
-
-  /* Section wrapper */
-  .gg-products {
-    padding: 40px 50px;
-    font-family: 'Jost', sans-serif;
+  .gg-products-wrapper {
     max-width: 1440px;
-    margin: 0 auto;
+    margin: 60px auto;
+    padding: 0 50px;
+    font-family: 'Jost', sans-serif;
   }
 
-  /* Section heading — Lustria 36px as per Figma */
   .gg-products__heading {
     font-family: 'Lustria', serif;
-    font-weight: 400;
     font-size: 36px;
-    line-height: 120%;
+    font-weight: 400;
+    margin-bottom: 40px;
     color: #000000;
-    margin: 0 0 30px 0;
   }
 
-  /* 3 column grid — gap 20px as per Figma */
   .gg-products__grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
   }
 
-  @media (max-width: 1024px) {
-    .gg-products__grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  @media (max-width: 680px) {
-    .gg-products__grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  /* Individual product card */
   .gg-products__card {
     position: relative;
-    width: 100%;
-    aspect-ratio: 433 / 444;
-    overflow: hidden;
-    cursor: pointer;
+    line-height: 0;
   }
 
-  /* Product image fills card */
   .gg-products__image {
     width: 100%;
-    height: 100%;
+    height: auto;
     object-fit: cover;
     display: block;
   }
 
-  /* "+" circular button — positioned over image as per Figma */
   .gg-products__plus-btn {
     position: absolute;
-    width: 22px;
-    height: 22px;
+    bottom: 24px;
+    right: 24px;
+    width: 32px;
+    height: 32px;
+    background: #FFFFFF;
+    border: 1px solid #000000;
     border-radius: 50%;
-    background: rgba(248, 248, 248, 0.9);
-    border: 1.5px solid #000000;
-    font-size: 16px;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    bottom: 20px;
-    right: 20px;
-    padding: 0;
-    line-height: 1;
+    font-size: 20px;
+    transition: transform 0.2s ease;
   }
 
   .gg-products__plus-btn:hover {
+    transform: scale(1.1);
     background: #000000;
     color: #FFFFFF;
   }
 
-  /* =====================
-     Popup Modal Styles
-  ===================== */
-
-  /* Dark overlay behind popup */
-  .gg-popup__overlay {
-    display: none;
+  /* MODAL STYLES */
+  .gg-modal {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 9999;
+    display: none;
+    z-index: 10000;
     align-items: center;
     justify-content: center;
   }
 
-  /* Show overlay when active */
-  .gg-popup__overlay.active {
-    display: flex;
-  }
+  .gg-modal.is-active { display: flex; }
 
-  /* Popup box */
-  .gg-popup {
-    background: #FFFFFF;
-    width: 600px;
-    max-width: 90%;
-    padding: 30px;
-    position: relative;
-    font-family: 'Jost', sans-serif;
-  }
-
-  /* Close button */
-  .gg-popup__close {
+  .gg-modal__overlay {
     position: absolute;
-    top: 15px;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+  }
+
+  .gg-modal__container {
+    position: relative;
+    background: #FFFFFF;
+    width: 100%;
+    max-width: 800px;
+    padding: 40px;
+    display: flex;
+    gap: 30px;
+  }
+
+  .gg-modal__close {
+    position: absolute;
+    top: 10px;
     right: 15px;
     background: none;
     border: none;
-    font-size: 18px;
-    cursor: pointer;
-    padding: 0;
-  }
-
-  /* Popup content layout — image left, details right */
-  .gg-popup__content {
-    display: flex;
-    gap: 20px;
-    align-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  @media (max-width: 640px) {
-    .gg-popup {
-      width: auto;
-      padding: 20px;
-    }
-    .gg-popup__content {
-      flex-direction: column;
-      gap: 16px;
-    }
-    .gg-popup__image {
-      width: 100%;
-      height: auto;
-      aspect-ratio: 1;
-    }
-  }
-
-  /* Popup product image */
-  .gg-popup__image {
-    width: 180px;
-    height: 180px;
-    object-fit: cover;
-    flex-shrink: 0;
-  }
-
-  /* Popup product details */
-  .gg-popup__details {
-    flex: 1;
-  }
-
-  /* Product title in popup */
-  .gg-popup__title {
-    font-family: 'Jost', sans-serif;
-    font-weight: 500;
-    font-size: 18px;
-    margin: 0 0 8px 0;
-    color: #000000;
-  }
-
-  /* Product price in popup */
-  .gg-popup__price {
-    font-size: 16px;
-    font-weight: 400;
-    margin: 0 0 8px 0;
-    color: #000000;
-  }
-
-  /* Product description in popup */
-  .gg-popup__description {
-    font-size: 13px;
-    color: #333333;
-    margin: 0 0 15px 0;
-    line-height: 1.5;
-  }
-
-  /* Field label */
-  .gg-popup__label {
-    display: block;
-    font-size: 13px;
-    font-weight: 500;
-    margin-bottom: 6px;
-    color: #000000;
-  }
-
-  /* Field wrapper */
-  .gg-popup__field {
-    margin-bottom: 15px;
-  }
-
-  /* Color buttons row */
-  .gg-popup__colors {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-
-  /* Individual color button */
-  .gg-popup__color-btn {
-    padding: 6px 14px;
-    border: 1px solid #000000;
-    background: #FFFFFF;
-    font-family: 'Jost', sans-serif;
-    font-size: 13px;
+    font-size: 30px;
     cursor: pointer;
   }
 
-  /* Active/selected color button */
-  .gg-popup__color-btn.active {
-    background: #000000;
-    color: #FFFFFF;
+  /* MODAL CONTENT LAYOUT */
+  .gg-qv { display: flex; gap: 30px; width: 100%; }
+  .gg-qv__image { width: 350px; flex-shrink: 0; }
+  .gg-qv__image img { width: 100%; height: auto; display: block; }
+  .gg-qv__info { flex-grow: 1; display: flex; flex-direction: column; }
+  .gg-qv__title { font-size: 24px; font-weight: 500; margin: 0 0 10px 0; }
+  .gg-qv__price { font-size: 18px; margin-bottom: 15px; }
+  .gg-qv__desc { font-size: 14px; line-height: 1.5; color: #666; margin-bottom: 20px; }
+
+  /* VARIANTS */
+  .gg-qv__label { font-size: 13px; font-weight: 500; margin-bottom: 8px; display: block; }
+  .gg-qv__option-group { margin-bottom: 20px; }
+  
+  .gg-qv__swatches { display: flex; gap: 10px; }
+  .gg-qv__swatch {
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .gg-qv__swatch.is-selected { border-color: #000; background: #000; color: #fff; }
+  
+  .gg-qv__select {
+    width: 100%;
+    height: 45px;
+    border: 1px solid #000;
+    padding: 0 10px;
+    font-family: inherit;
   }
 
-  /* Size dropdown */
-  .gg-popup__select {
+  .gg-qv__atc {
+    background: #000;
+    color: #fff;
     width: 100%;
-    padding: 10px;
-    border: 1px solid #000000;
-    font-family: 'Jost', sans-serif;
-    font-size: 14px;
-    appearance: auto;
-    background: #FFFFFF;
-  }
-
-  /* Add to cart button — black with arrow as per Figma */
-  .gg-popup__atc-btn {
-    width: 100%;
-    padding: 14px;
-    background: #000000;
-    color: #FFFFFF;
+    height: 50px;
     border: none;
-    font-family: 'Jost', sans-serif;
-    font-size: 14px;
-    text-transform: uppercase;
     cursor: pointer;
-    letter-spacing: 1px;
-    margin-top: 10px;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
   }
 
-  .gg-popup__atc-btn:hover {
-    background: #333333;
-  }
-
-  .gg-popup__atc-btn:disabled {
-    background: #666666;
-    cursor: not-allowed;
+  @media (max-width: 768px) {
+    .gg-products__grid { grid-template-columns: 1fr; }
+    .gg-modal__container { flex-direction: column; padding: 20px; max-width: 90%; }
+    .gg-qv { flex-direction: column; }
+    .gg-qv__image { width: 100%; }
   }
 </style>
 
-{% comment %} 
-  Vanilla JS — No jQuery
-  Handles popup open/close and add to cart functionality
-{% endcomment %}
 <script>
-  // Store current variant mapping for add to cart
-  var currentVariantId = null;
-  var currentVariantMap = {};
+  let currentProduct = null;
+  let selectedOptions = {};
 
-  // Open popup and fill with product data from data attributes
-  function openGiftPopup(button) {
+  const bonusProductHandle = "{{ section.settings.bonus_product.handle }}";
 
-    // Get product data from button's data attributes
-    var title = button.getAttribute('data-title');
-    var price = button.getAttribute('data-price');
-    var image = button.getAttribute('data-image');
-    var description = button.getAttribute('data-description');
-    var colors = button.getAttribute('data-colors');
-    var sizes = button.getAttribute('data-sizes');
-    var variantMapString = button.getAttribute('data-variant-map');
+  function initQuickView(btn) {
+    const handle = btn.dataset.productHandle;
+    const productData = JSON.parse(document.getElementById(`ProductJson-${handle}`).textContent);
+    
+    currentProduct = productData;
+    selectedOptions = {
+      option1: productData.variants[0].option1,
+      option2: productData.variants[0].option2,
+      option3: productData.variants[0].option3
+    };
 
-    // Parse variant map for size/color selection
-    currentVariantMap = {};
-    if (variantMapString) {
-      variantMapString.split(';').forEach(function(entry) {
-        var parts = entry.split(':');
-        if (parts.length === 2) {
-          currentVariantMap[parts[0]] = parts[1];
-        }
-      });
-    }
-
-    // Fill popup with product data
-    document.getElementById('ggPopupTitle').textContent = title;
-    document.getElementById('ggPopupPrice').textContent = price;
-    document.getElementById('ggPopupImage').src = image;
-    document.getElementById('ggPopupImage').alt = title;
-    document.getElementById('ggPopupDescription').textContent = description;
-
-    // Reset add to cart button
-    var atcBtn = document.getElementById('ggPopupATCBtn');
-    atcBtn.textContent = 'ADD TO CART →';
-    atcBtn.disabled = false;
-
-    // Build color buttons dynamically from product variants
-    var colorsContainer = document.getElementById('ggPopupColors');
-    colorsContainer.innerHTML = '';
-
-    if (colors) {
-      var colorArray = colors.split(',')
-        .map(function(value) { return value.trim(); })
-        .filter(function(value, index, self) {
-          return value && self.indexOf(value) === index;
-        });
-
-      colorArray.forEach(function(color, index) {
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.textContent = color;
-        btn.className = 'gg-popup__color-btn' + (index === 0 ? ' active' : '');
-        btn.onclick = function() {
-          document.querySelectorAll('.gg-popup__color-btn').forEach(function(b) {
-            b.classList.remove('active');
-          });
-          btn.classList.add('active');
-        };
-        colorsContainer.appendChild(btn);
-      });
-    }
-
-    // Build size dropdown dynamically from product variants
-    var sizeSelect = document.getElementById('ggPopupSize');
-    sizeSelect.innerHTML = '<option value="">Choose your size</option>';
-
-    if (sizes) {
-      var sizeArray = sizes.split(',')
-        .map(function(value) { return value.trim(); })
-        .filter(function(value, index, self) {
-          return value && self.indexOf(value) === index;
-        });
-
-      sizeArray.forEach(function(size) {
-        var option = document.createElement('option');
-        option.value = size;
-        option.textContent = size;
-        sizeSelect.appendChild(option);
-      });
-    }
-
-    // Default variant ID uses first available mapping if possible
-    currentVariantId = variantMapString ? Object.values(currentVariantMap)[0] : null;
-
-    // Show the popup overlay
-    document.getElementById('ggPopupOverlay').classList.add('active');
-
-    // Prevent body from scrolling while popup is open
+    renderModal();
+    document.getElementById('gg-modal').classList.add('is-active');
     document.body.style.overflow = 'hidden';
-
-    // Focus close button for accessibility
-    var closeBtn = document.getElementById('ggPopupCloseBtn');
-    if (closeBtn) {
-      closeBtn.focus();
-    }
   }
 
-  // Close popup and restore scroll
-  function closeGiftPopup() {
-    document.getElementById('ggPopupOverlay').classList.remove('active');
+  function renderModal() {
+    const modalBody = document.getElementById('gg-modal-body');
+    const variant = getSelectedVariant();
+    
+    // Logic to build color swatches (assumed Option 1) and size dropdown (Option 2)
+    let colorHtml = '';
+    const colorOptions = [...new Set(currentProduct.variants.map(v => v.option1))];
+    colorOptions.forEach(opt => {
+      colorHtml += `<div class="gg-qv__swatch ${selectedOptions.option1 === opt ? 'is-selected' : ''}" onclick="updateOption('option1', '${opt}')">${opt}</div>`;
+    });
+
+    let sizeHtml = '';
+    const sizeOptions = [...new Set(currentProduct.variants.map(v => v.option2))];
+    sizeOptions.forEach(opt => {
+      sizeHtml += `<option value="${opt}" ${selectedOptions.option2 === opt ? 'selected' : ''}>${opt}</option>`;
+    });
+
+    modalBody.innerHTML = `
+      <div class="gg-qv">
+        <div class="gg-qv__image"><img src="${currentProduct.featured_image}"></div>
+        <div class="gg-qv__info">
+          <h3 class="gg-qv__title">${currentProduct.title}</h3>
+          <p class="gg-qv__price">$${(variant.price / 100).toFixed(2)}</p>
+          <div class="gg-qv__desc">${currentProduct.description}</div>
+          
+          <div class="gg-qv__option-group">
+            <span class="gg-qv__label">Color</span>
+            <div class="gg-qv__swatches">${colorHtml}</div>
+          </div>
+
+          <div class="gg-qv__option-group">
+            <span class="gg-qv__label">Size</span>
+            <select class="gg-qv__select" onchange="updateOption('option2', this.value)">
+              ${sizeHtml}
+            </select>
+          </div>
+
+          <button class="gg-qv__atc" id="atc-btn" onclick="handleAddToCart()">
+            ADD TO CART &nbsp; &rarr;
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  function updateOption(name, value) {
+    selectedOptions[name] = value;
+    renderModal();
+  }
+
+  function getSelectedVariant() {
+    return currentProduct.variants.find(v => 
+      v.option1 === selectedOptions.option1 && 
+      v.option2 === selectedOptions.option2
+    ) || currentProduct.variants[0];
+  }
+
+  function closeGGModal() {
+    document.getElementById('gg-modal').classList.remove('is-active');
     document.body.style.overflow = '';
-    currentVariantId = null;
-    currentVariantMap = {};
   }
 
-  // Get selected variant ID by color and size
-  function getSelectedVariantId() {
-    var activeColorButton = document.querySelector('.gg-popup__color-btn.active');
-    var selectedColor = activeColorButton ? activeColorButton.textContent.trim() : '';
-    var selectedSize = document.getElementById('ggPopupSize').value.trim();
-    var variantKey = selectedColor + '|' + selectedSize;
-    return currentVariantMap[variantKey] || currentVariantId;
-  }
+  async function handleAddToCart() {
+    const variant = getSelectedVariant();
+    const btn = document.getElementById('atc-btn');
+    btn.innerText = "Adding...";
 
-  // Add to cart using Shopify AJAX API — vanilla JS only
-  function addToCartFromPopup() {
-    var sizeSelect = document.getElementById('ggPopupSize');
-    var selectedSize = sizeSelect.value.trim();
-    var btn = document.getElementById('ggPopupATCBtn');
+    let itemsToAdd = [{ id: variant.id, quantity: 1 }];
 
-    if (!selectedSize) {
-      sizeSelect.focus();
-      btn.textContent = 'Choose size first';
-      setTimeout(function() {
-        btn.textContent = 'ADD TO CART →';
-      }, 1500);
-      return;
+    // SPECIAL LOGIC: BLACK AND MEDIUM
+    const color = variant.option1.toLowerCase();
+    const size = variant.option2.toLowerCase();
+
+    if (color === 'black' && size === 'medium') {
+      // Get bonus product ID - In real Shopify, you'd fetch the variant ID.
+      // For this test, we assume there's a variant available for the Soft Winter Jacket.
+      const bonusRes = await fetch(`/products/${bonusProductHandle}.js`);
+      const bonusProd = await bonusRes.json();
+      itemsToAdd.push({ id: bonusProd.variants[0].id, quantity: 1 });
     }
 
-    var variantId = getSelectedVariantId();
-    if (!variantId) {
-      btn.textContent = 'Variant unavailable';
-      btn.disabled = false;
-      return;
-    }
-
-    // Disable button while adding
-    btn.disabled = true;
-    btn.textContent = 'Adding...';
-
-    // Send POST request to Shopify cart API
     fetch('/cart/add.js', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        id: variantId,
-        quantity: 1
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items: itemsToAdd })
     })
-    .then(function(response) {
-      return response.json();
-    })
-    .then(function(data) {
-      // Success — show confirmation
-      btn.textContent = 'Added to Cart ✓';
-      setTimeout(function() {
-        closeGiftPopup();
-      }, 1500);
-    })
-    .catch(function(error) {
-      // Error — let user try again
-      console.error('Add to cart error:', error);
-      btn.textContent = 'Try Again';
-      btn.disabled = false;
+    .then(res => res.json())
+    .then(data => {
+      btn.innerText = "Added!";
+      setTimeout(() => { closeGGModal(); btn.innerText = "ADD TO CART →"; }, 1000);
+      // Trigger theme cart refresh if needed
+      if(window.refreshCart) window.refreshCart();
     });
   }
-
-  // Close popup if Escape key is pressed
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      closeGiftPopup();
-    }
-  });
 </script>
 
 {% schema %}
 {
   "name": "Gift Guide Products",
-  "settings": [],
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Section Heading",
+      "default": "Tisso vison in the wild"
+    },
+    {
+      "type": "product_list",
+      "id": "product_list",
+      "label": "Select 6 Products",
+      "limit": 6
+    },
+    {
+      "type": "product",
+      "id": "bonus_product",
+      "label": "Soft Winter Jacket (Bonus Product)"
+    }
+  ],
   "presets": [
     {
       "name": "Gift Guide Products"

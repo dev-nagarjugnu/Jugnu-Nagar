@@ -12,14 +12,29 @@
     "gift-guide-banner": {
       "type": "gift-guide-banner",
       "settings": {
+        "logo_text": "TISSO VISION",
+        "tagline_text": "Find the ideal gift for your loved ones.",
+        "top_btn_text": "CHOOSE GIFT",
         "top_url": "",
-        "cta_url": ""
+        "hero_title": "The Gift Guide",
+        "hero_desc": "Discover Joy: Your Ultimate Holiday Gift Destination. Explore our curated selection and find the perfect gifts to delight your loved ones this holiday season.",
+        "cta_text": "SHOP NOW",
+        "cta_url": "",
+        "ticker_text": "SUSTAINABLE, ETHICALLY MADE CLOTHES IN SIZES XXS TO 6XL"
       }
     },
     "gift-guide-products": {
       "type": "gift-guide-products",
       "settings": {
         "heading": "Tisso vision in the wild",
+        "product_list": [
+          "black-leather-bag",
+          "blue-silk-tuxedo",
+          "chequered-red-shirt",
+          "classic-leather-jacket",
+          "classic-varsity-top",
+          "dark-denim-top"
+        ],
         "collection": "",
         "bonus_product": "dark-winter-jacket"
       }

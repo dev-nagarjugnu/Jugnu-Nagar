@@ -1,130 +1,121 @@
 {% comment %}
   ==============================================================================
-  SECTION: Gift Guide Products (PRO VERSION)
-  - REQUIREMENTS: Vanilla JavaScript Only (No jQuery), Lustria & Jost Fonts.
-  - GRID: 3-column desktop grid with 20px gap.
-  - SPECIAL LOGIC: Automatic "Soft Winter Jacket" addition for Black + Medium.
+  SECTION: Gift Guide Products (V3 - STABLE)
+  - REQUIREMENTS: Vanilla JS, Lustria Heading, Jost Body.
+  - FEATURES: QuickView Popup, Logic for Black + Medium = Bonus Jacket.
+  - BUG FIX: Added Event Listeners to ensure Modal triggers every time.
   ==============================================================================
 {% endcomment %}
 
 <link href="https://fonts.googleapis.com/css2?family=Lustria&family=Jost:wght@400;500&display=swap" rel="stylesheet">
 
 <style>
-  /* --- BASE STYLES --- */
-  .gg-products-section {
+  /* --- SECTION WRAP --- */
+  .gg-prod-container {
     max-width: 1440px;
-    margin: 80px auto;
+    margin: 60px auto;
     padding: 0 50px;
     font-family: 'Jost', sans-serif;
-    color: #000000;
-    -webkit-font-smoothing: antialiased;
+    color: #000;
   }
 
-  .gg-products__heading {
+  .gg-prod__heading {
     font-family: 'Lustria', serif;
     font-size: 36px;
     font-weight: 400;
-    margin-bottom: 45px;
-    letter-spacing: -0.02em;
+    margin-bottom: 40px;
   }
 
-  /* --- PIXEL PERFECT GRID --- */
-  .gg-products__grid {
+  /* --- GRID 3x2 --- */
+  .gg-prod__grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
   }
 
-  .gg-products__card {
+  .gg-prod__card {
     position: relative;
     width: 100%;
-    background: #FFFFFF;
+    line-height: 0;
   }
 
-  .gg-products__image-box {
+  .gg-prod__image-wrap {
     position: relative;
-    /* Aspect Ratio 433:444 matches Figma */
-    aspect-ratio: 433 / 444; 
+    aspect-ratio: 433 / 444; /* Exact Figma Ratio */
     overflow: hidden;
   }
 
-  .gg-products__image-box img {
+  .gg-prod__image-wrap img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    display: block;
-    transition: transform 0.8s ease;
+    transition: transform 0.6s ease;
   }
 
-  .gg-products__card:hover img {
-    transform: scale(1.06);
+  .gg-prod__card:hover img {
+    transform: scale(1.05);
   }
 
   /* --- PLUS BUTTON --- */
-  .gg-products__plus-btn {
+  .gg-prod__plus-btn {
     position: absolute;
-    bottom: 24px;
-    right: 24px;
-    width: 32px;
-    height: 32px;
+    bottom: 20px;
+    right: 20px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
-    background: #FFFFFF;
-    border: 1px solid #000000;
+    background: #FFF;
+    border: 1px solid #000;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 5;
+    z-index: 10;
     padding: 0;
-    transition: background 0.3s, color 0.3s;
+    transition: 0.3s;
   }
 
-  .gg-products__plus-btn span {
+  .gg-prod__plus-btn span {
     font-size: 22px;
     line-height: 1;
-    margin-top: -2px;
+    font-weight: 400;
   }
 
-  .gg-products__plus-btn:hover {
-    background: #000000;
-    color: #FFFFFF;
+  .gg-prod__plus-btn:hover {
+    background: #000;
+    color: #FFF;
   }
 
-  /* --- MODAL / POPUP --- */
-  .gg-modal {
+  /* --- MODAL STYLES --- */
+  .gg-modal-root {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 9999;
-    display: none; /* Controlled by Vanilla JS */
+    inset: 0;
+    z-index: 99999;
+    display: none; /* JS toggles this */
     align-items: center;
     justify-content: center;
   }
 
-  .gg-modal.is-active { display: flex; }
+  .gg-modal-root.is-active { display: flex; }
 
-  .gg-modal__overlay {
+  .gg-modal-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(2px);
+    background: rgba(0,0,0,0.5);
   }
 
-  .gg-modal__inner {
+  .gg-modal-container {
     position: relative;
-    background: #FFFFFF;
-    width: 100%;
+    background: #FFF;
+    width: 90%;
     max-width: 850px;
     padding: 40px;
+    z-index: 10;
     display: flex;
     gap: 40px;
-    z-index: 100;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
   }
 
-  .gg-modal__close {
+  .gg-modal-close {
     position: absolute;
     top: 15px;
     right: 20px;
@@ -134,96 +125,58 @@
     cursor: pointer;
   }
 
-  /* --- QUICKVIEW UI --- */
-  .qv-image-side { width: 45%; }
-  .qv-image-side img { width: 100%; height: auto; display: block; }
+  /* --- MODAL CONTENT UI --- */
+  .qv-left { width: 45%; flex-shrink: 0; }
+  .qv-left img { width: 100%; height: auto; display: block; }
+  .qv-right { width: 55%; display: flex; flex-direction: column; }
   
-  .qv-content-side { width: 55%; display: flex; flex-direction: column; }
-  .qv-title { font-size: 24px; font-weight: 500; margin: 0 0 8px 0; text-transform: uppercase; }
-  .qv-price { font-size: 20px; margin-bottom: 20px; }
-  .qv-desc { font-size: 14px; color: #555; line-height: 1.6; margin-bottom: 25px; }
+  .qv-title { font-size: 22px; font-weight: 500; text-transform: uppercase; margin: 0 0 10px; }
+  .qv-price { font-size: 18px; margin-bottom: 15px; }
+  .qv-desc { font-size: 14px; line-height: 1.6; color: #555; margin-bottom: 20px; }
 
-  .qv-label { display: block; font-size: 12px; font-weight: 500; text-transform: uppercase; margin-bottom: 10px; }
-  
+  .qv-label { font-size: 12px; font-weight: 500; text-transform: uppercase; margin-bottom: 8px; display: block; }
   .qv-swatches { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-  .qv-swatch { 
-    padding: 10px 20px; 
-    border: 1px solid #ddd; 
-    cursor: pointer; 
-    font-size: 13px; 
-    transition: all 0.2s ease;
-  }
-  .qv-swatch.is-selected { border-color: #000; background: #000; color: #fff; }
+  .qv-swatch { padding: 8px 16px; border: 1px solid #ddd; cursor: pointer; font-size: 13px; }
+  .qv-swatch.selected { background: #000; color: #fff; border-color: #000; }
+  
+  .qv-select { width: 100%; height: 45px; border: 1px solid #000; margin-bottom: 25px; padding: 0 10px; }
 
-  .qv-select { 
-    width: 100%; 
-    height: 48px; 
-    border: 1px solid #000; 
-    padding: 0 15px; 
-    margin-bottom: 30px; 
-    font-family: inherit; 
-    font-size: 14px;
-    background-color: #fff;
-  }
-
-  .qv-add-btn {
+  .qv-atc-btn {
     background: #000;
     color: #fff;
     width: 100%;
     height: 55px;
     border: none;
+    cursor: pointer;
     text-transform: uppercase;
     font-weight: 500;
-    letter-spacing: 1px;
-    cursor: pointer;
     margin-top: auto;
-    transition: transform 0.2s;
-  }
-
-  .qv-add-btn:active { transform: scale(0.98); }
-
-  /* --- RESPONSIVE --- */
-  @media (max-width: 1024px) {
-    .gg-products__grid { grid-template-columns: repeat(2, 1fr); }
   }
 
   @media (max-width: 768px) {
-    .gg-products-section { padding: 0 20px; }
-    .gg-products__grid { grid-template-columns: 1fr; }
-    .gg-modal__inner { flex-direction: column; width: 90%; max-height: 90vh; overflow-y: auto; padding: 25px; }
-    .qv-image-side, .qv-content-side { width: 100%; }
+    .gg-prod__grid { grid-template-columns: 1fr; }
+    .gg-modal-container { flex-direction: column; width: 95%; max-height: 90vh; overflow-y: auto; padding: 25px; }
+    .qv-left, .qv-right { width: 100%; }
   }
 </style>
 
-<div class="gg-products-section">
-  <h2 class="gg-products__heading">{{ section.settings.heading }}</h2>
+<div class="gg-prod-container">
+  <h2 class="gg-prod__heading">{{ section.settings.heading }}</h2>
 
-  <div class="gg-products__grid">
-    {% comment %} FALLBACK LOGIC: Ensures grid is never empty {% endcomment %}
-    {% assign active_col = collections[section.settings.collection] | default: collections['gift-guide'] | default: collections['all'] %}
+  <div class="gg-prod__grid">
+    {% comment %} Automatic collection fallback {% endcomment %}
+    {% assign col = collections[section.settings.collection] | default: collections['gift-guide'] | default: collections['all'] %}
     
-    {% for product in active_col.products limit: 6 %}
-      <div class="gg-products__card">
-        <div class="gg-products__image-box">
-          <img
-            src="{{ product.featured_image | img_url: '700x700', crop: 'center' }}"
-            alt="{{ product.title | escape }}"
-            loading="lazy"
-            width="433"
-            height="444"
-          >
-          {% comment %} VANILLA JS TRIGGER: Uses data-handle {% endcomment %}
-          <button 
-            type="button" 
-            class="gg-products__plus-btn" 
-            onclick="openQuickViewModal('{{ product.handle }}')"
-          >
+    {% for product in col.products limit: 6 %}
+      <div class="gg-prod__card">
+        <div class="gg-prod__image-wrap">
+          <img src="{{ product.featured_image | img_url: '600x600', crop: 'center' }}" alt="{{ product.title }}" loading="lazy">
+          <button type="button" class="gg-prod__plus-btn js-gg-plus" data-handle="{{ product.handle }}">
             <span>+</span>
           </button>
         </div>
-        
-        {% comment %} SEO-Friendly JSON data storage {% endcomment %}
-        <script type="application/json" id="GG-Data-{{ product.handle }}">
+        {% comment %} JSON data for JS to pick up {% endcomment %}
+        <script type="application/json" id="Data-{{ product.handle }}">
           {{ product | json }}
         </script>
       </div>
@@ -231,167 +184,149 @@
   </div>
 </div>
 
-{% comment %} MODAL CONTAINER {% endcomment %}
-<div id="GG-QuickModal" class="gg-modal">
-  <div class="gg-modal__overlay" onclick="closeQuickViewModal()"></div>
-  <div class="gg-modal__inner">
-    <button class="gg-modal__close" onclick="closeQuickViewModal()">&times;</button>
-    <div id="GG-ModalInject" style="width:100%; display:flex; gap:40px;"></div>
+{% comment %} MODAL ROOT {% endcomment %}
+<div id="GG-Modal" class="gg-modal-root">
+  <div class="gg-modal-overlay js-gg-close"></div>
+  <div class="gg-modal-container">
+    <button class="gg-modal-close js-gg-close">&times;</button>
+    <div id="GG-Modal-Body" style="width:100%; display:flex; gap:40px;"></div>
   </div>
 </div>
 
 <script>
-  /**
-   * PURE VANILLA JAVASCRIPT LOGIC
-   * NO JQUERY USED
-   */
-  
-  let currentGGProduct = null;
-  let currentGGOptions = { option1: null, option2: null, option3: null };
-  const BONUS_HANDLE = "soft-winter-jacket";
+/**
+ * VANILLA JAVASCRIPT - NO JQUERY
+ */
+(function() {
+  let activeProd = null;
+  let activeOptions = { option1: null, option2: null, option3: null };
+  const BONUS_H = "soft-winter-jacket";
 
-  function openQuickViewModal(handle) {
-    // Vanilla JS selector
-    const dataElement = document.getElementById(`GG-Data-${handle}`);
-    if(!dataElement) return;
+  // Initialize Event Listeners
+  function init() {
+    // Plus Buttons
+    const btns = document.querySelectorAll('.js-gg-plus');
+    btns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const h = btn.getAttribute('data-handle');
+        openModal(h);
+      });
+    });
 
-    currentGGProduct = JSON.parse(dataElement.textContent);
+    // Close Buttons
+    const closeBtns = document.querySelectorAll('.js-gg-close');
+    closeBtns.forEach(btn => {
+      btn.addEventListener('click', closeModal);
+    });
+  }
+
+  function openModal(handle) {
+    const dataStr = document.getElementById(`Data-${handle}`);
+    if(!dataStr) { console.error("No product data found for", handle); return; }
     
-    // Set default selections based on first variant
-    currentGGOptions.option1 = currentGGProduct.variants[0].option1;
-    currentGGOptions.option2 = currentGGProduct.variants[0].option2;
-    currentGGOptions.option3 = currentGGProduct.variants[0].option3;
-
-    renderGGModalContent();
+    activeProd = JSON.parse(dataStr.textContent);
     
-    // Toggle Modal using classList (Vanilla JS)
-    document.getElementById('GG-QuickModal').classList.add('is-active');
+    // Set initial options
+    activeOptions.option1 = activeProd.variants[0].option1;
+    activeOptions.option2 = activeProd.variants[0].option2;
+    activeOptions.option3 = activeProd.variants[0].option3;
+
+    renderContent();
+    document.getElementById('GG-Modal').classList.add('is-active');
     document.body.style.overflow = 'hidden';
   }
 
-  function closeQuickViewModal() {
-    document.getElementById('GG-QuickModal').classList.remove('is-active');
+  function closeModal() {
+    document.getElementById('GG-Modal').classList.remove('is-active');
     document.body.style.overflow = '';
   }
 
-  function updateGGSelection(index, value) {
-    currentGGOptions[`option${index}`] = value;
-    renderGGModalContent();
-  }
+  window.setGGOpt = function(index, value) {
+    activeOptions[`option${index}`] = value;
+    renderContent();
+  };
 
-  function renderGGModalContent() {
-    const container = document.getElementById('GG-ModalInject');
-    
-    // Find matching variant based on selections
-    const variant = currentGGProduct.variants.find(v => 
-      v.option1 === currentGGOptions.option1 && 
-      v.option2 === currentGGOptions.option2 && 
-      v.option3 === currentGGOptions.option3
-    ) || currentGGProduct.variants[0];
+  function renderContent() {
+    const body = document.getElementById('GG-Modal-Body');
+    const variant = activeProd.variants.find(v => 
+      v.option1 === activeOptions.option1 && 
+      v.option2 === activeOptions.option2 && 
+      v.option3 === activeOptions.option3
+    ) || activeProd.variants[0];
 
-    // Build Options HTML Dynamically
-    let optionsLayout = '';
-    currentGGProduct.options.forEach((opt, idx) => {
-      const optIndex = idx + 1;
-      const values = [...new Set(currentGGProduct.variants.map(v => v[`option${optIndex}`]))];
+    let optHtml = '';
+    activeProd.options.forEach((opt, i) => {
+      const idx = i + 1;
+      const vals = [...new Set(activeProd.variants.map(v => v[`option${idx}`]))];
       
-      optionsLayout += `<label class="qv-label">${opt.name}</label>`;
+      optHtml += `<label class="qv-label">${opt.name}</label>`;
       
-      if (opt.name.toLowerCase().includes('color')) {
-        optionsLayout += `<div class="qv-swatches">` + values.map(v => `
-          <div class="qv-swatch ${currentGGOptions[`option${optIndex}`] === v ? 'is-selected' : ''}" 
-               onclick="updateGGSelection(${optIndex}, '${v}')">${v}</div>
+      if(opt.name.toLowerCase().includes('color')) {
+        optHtml += `<div class="qv-swatches">` + vals.map(v => `
+          <div class="qv-swatch ${activeOptions[`option${idx}`] === v ? 'selected' : ''}" 
+               onclick="setGGOpt(${idx}, '${v}')">${v}</div>
         `).join('') + `</div>`;
       } else {
-        optionsLayout += `<select class="qv-select" onchange="updateGGSelection(${optIndex}, this.value)">` + values.map(v => `
-          <option value="${v}" ${currentGGOptions[`option${optIndex}`] === v ? 'selected' : ''}>${v}</option>
+        optHtml += `<select class="qv-select" onchange="setGGOpt(${idx}, this.value)">` + vals.map(v => `
+          <option value="${v}" ${activeOptions[`option${idx}`] === v ? 'selected' : ''}>${v}</option>
         `).join('') + `</select>`;
       }
     });
 
-    container.innerHTML = `
-      <div class="qv-image-side">
-        <img src="${variant.featured_image ? variant.featured_image.src : currentGGProduct.featured_image}" alt="Product">
-      </div>
-      <div class="qv-content-side">
-        <h3 class="qv-title">${currentGGProduct.title}</h3>
+    body.innerHTML = `
+      <div class="qv-left"><img src="${variant.featured_image ? variant.featured_image.src : activeProd.featured_image}"></div>
+      <div class="qv-right">
+        <h3 class="qv-title">${activeProd.title}</h3>
         <p class="qv-price">$${(variant.price / 100).toFixed(2)}</p>
-        <div class="qv-desc">${currentGGProduct.description.substring(0, 180)}...</div>
-        ${optionsLayout}
-        <button class="qv-add-btn" id="GG-AddBtn" onclick="executeGGAddToCart(${variant.id})">
-          ADD TO CART &nbsp; &rarr;
-        </button>
+        <div class="qv-desc">${activeProd.description.substring(0, 180)}...</div>
+        ${optHtml}
+        <button class="qv-atc-btn" onclick="runGGAdd(${variant.id})">ADD TO CART &nbsp; &rarr;</button>
       </div>
     `;
   }
 
-  async function executeGGAddToCart(variantId) {
-    const btn = document.getElementById('GG-AddBtn');
-    btn.innerHTML = "Wait...";
-    btn.disabled = true;
-
-    let items = [{ id: variantId, quantity: 1 }];
-
-    // --- VANILLA JS RECRUITER LOGIC ---
-    // Scan all options for Black and Medium/M
-    const selections = Object.values(currentGGOptions).filter(x => x).map(x => x.toLowerCase());
-    const isBlack = selections.includes('black');
-    const isMedium = selections.includes('medium') || selections.includes('m');
-
-    if (isBlack && isMedium) {
-      try {
-        // Fetch bonus product using Vanilla JS fetch()
-        const response = await fetch(`/products/${BONUS_HANDLE}.js`);
-        if (response.ok) {
-          const bonus = await response.json();
-          if (bonus.variants[0]) {
-            items.push({ id: bonus.variants[0].id, quantity: 1 });
-          }
-        }
-      } catch (err) { console.warn("Bonus product not found."); }
+  window.runGGAdd = async function(id) {
+    const btn = document.querySelector('.qv-atc-btn');
+    btn.innerText = "Adding...";
+    
+    let items = [{ id: id, quantity: 1 }];
+    
+    const selections = Object.values(activeOptions).filter(x => x).map(x => x.toLowerCase());
+    if(selections.includes('black') && (selections.includes('medium') || selections.includes('m'))) {
+      const res = await fetch(`/products/${BONUS_H}.js`);
+      if(res.ok) {
+        const bonus = await res.json();
+        if(bonus.variants[0]) items.push({ id: bonus.variants[0].id, quantity: 1 });
+      }
     }
 
-    // Shopify AJAX API using fetch() (Modern Vanilla JS)
     fetch('/cart/add.js', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ items: items })
     })
-    .then(res => res.json())
-    .then(data => {
-      btn.innerHTML = "Added! ✓";
-      setTimeout(() => {
-        closeQuickViewModal();
-        window.location.reload(); 
-      }, 1000);
-    })
-    .catch(err => {
-      btn.innerHTML = "Error";
-      btn.disabled = false;
+    .then(() => {
+      btn.innerText = "Added!";
+      setTimeout(() => { window.location.reload(); }, 1000);
     });
+  };
+
+  // Run on load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
   }
+})();
 </script>
 
 {% schema %}
 {
   "name": "Gift Guide Products",
   "settings": [
-    {
-      "type": "text",
-      "id": "heading",
-      "label": "Heading",
-      "default": "Tisso vision in the wild"
-    },
-    {
-      "type": "collection",
-      "id": "collection",
-      "label": "Collection"
-    }
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Tisso vision in the wild" },
+    { "type": "collection", "id": "collection", "label": "Collection" }
   ],
-  "presets": [
-    {
-      "name": "Gift Guide Products"
-    }
-  ]
+  "presets": [{ "name": "Gift Guide Products" }]
 }
 {% endschema %}

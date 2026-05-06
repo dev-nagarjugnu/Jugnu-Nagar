@@ -141,7 +141,7 @@
   .qv-img-box { width: 120px; height: 135px; flex-shrink: 0; overflow: hidden; background: #eee; }
   .qv-img-box img { width: 100%; height: 100%; object-fit: cover; }
   
-  .qv-text-box { flex-grow: 1; padding-top: 2px; overflow: hidden; }
+  .qv-text-box { flex-grow: 1; padding-top: 2px; padding-right: 26px; overflow: hidden; }
   .qv-title { font-family: var(--gg-jost); font-weight: 300; font-size: 16px; line-height: 1.2; margin: 0 0 6px; color: #000; text-transform: uppercase; }
   .qv-price { font-family: var(--gg-lustria); font-weight: 400; font-size: 16px; margin-bottom: 8px; color: #000; }
   .qv-desc { 
@@ -153,7 +153,7 @@
   /* Segmented Controls (Color/Size UI) */
   .qv-option-label { font-family: var(--gg-jost); font-size: 14px; font-weight: 400; color: #333; margin-bottom: 6px; display: block; text-transform: uppercase; }
   .qv-segmented-control { display: flex; border: 1px solid #000; width: 100%; margin-bottom: 15px; height: 38px; }
-  .qv-segment { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; transition: 0.2s; }
+  .qv-segment { flex: 1; min-width: 0; padding: 0 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; transition: 0.2s; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .qv-segment:not(:last-child) { border-right: 1px solid #000; }
   .qv-segment.selected { background: #000; color: #FFF; }
 
@@ -238,6 +238,25 @@
   let currentOptions = { option1: null, option2: null, option3: null };
   const BONUS_HANDLE = "{{ section.settings.bonus_product.handle | default: 'soft-winter-jacket' }}";
 
+  function escapeHtml(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function stripHtml(value) {
+    return String(value == null ? '' : value).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
+  function escapeForSingleQuotedJs(value) {
+    return String(value == null ? '' : value)
+      .replace(/\\/g, '\\\\')
+      .replace(/'/g, "\\'");
+  }
+
   function init() {
     // Modal Triggers
     document.querySelectorAll('.js-open-modal').forEach(btn => {
@@ -299,14 +318,14 @@
       const optIdx = index + 1;
       const values = [...new Set(currentProduct.variants.map(v => v[`option${optIdx}`]))];
 
-      optionsHtml += `<label class="qv-option-label">${optName}</label>`;
+      optionsHtml += `<label class="qv-option-label">${escapeHtml(optName)}</label>`;
       
       // COLOR as Segmented Control (as per Figma req)
       if (optName.toLowerCase().includes('color')) {
         optionsHtml += `<div class="qv-segmented-control">`;
         values.forEach(val => {
           const selectedClass = currentOptions[`option${optIdx}`] === val ? 'selected' : '';
-          optionsHtml += `<div class="qv-segment ${selectedClass}" onclick="updateSelection(${optIdx}, '${val}')">${val}</div>`;
+          optionsHtml += `<div class="qv-segment ${selectedClass}" onclick="updateSelection(${optIdx}, '${escapeForSingleQuotedJs(val)}')">${escapeHtml(val)}</div>`;
         });
         optionsHtml += `</div>`;
       } 
@@ -315,19 +334,26 @@
         optionsHtml += `<div class="qv-select-wrap"><select class="qv-select" onchange="updateSelection(${optIdx}, this.value)">`;
         values.forEach(val => {
           const selectedAttr = currentOptions[`option${optIdx}`] === val ? 'selected' : '';
-          optionsHtml += `<option value="${val}" ${selectedAttr}>${val}</option>`;
+          optionsHtml += `<option value="${escapeHtml(val)}" ${selectedAttr}>${escapeHtml(val)}</option>`;
         });
         optionsHtml += `</select></div>`;
       }
     });
 
+    const descriptionText = stripHtml(currentProduct.description || '');
+    const truncatedDescription = descriptionText.length > 100
+      ? `${descriptionText.substring(0, 100)}...`
+      : descriptionText;
+    const safeTitle = escapeHtml(currentProduct.title || '');
+    const safeDescription = escapeHtml(truncatedDescription);
+
     container.innerHTML = `
       <div class="qv-header">
         <div class="qv-img-box"><img src="${image}" alt="Product"></div>
         <div class="qv-text-box">
-          <h3 class="qv-title">${currentProduct.title}</h3>
+          <h3 class="qv-title">${safeTitle}</h3>
           <p class="qv-price">${priceFormatted}</p>
-          <div class="qv-desc">${currentProduct.description.substring(0, 100)}...</div>
+          <div class="qv-desc">${safeDescription}</div>
         </div>
       </div>
       <div class="qv-options-area">${optionsHtml}</div>

@@ -1,9 +1,9 @@
 {% comment %}
-  Gift Guide Banner - Pixel Perfect Figma Implementation
-  - Top Bar: Exact Auto-layout (Gap 360px, Padding 10px 50px)
-  - Hero Top Image: 1440px Full Width
-  - Hero Bottom: Content (550px) | Illustration (890px)
-  - Stitching: 12px overlap for seamless illustration
+  Gift Guide Banner - PRO VERSION
+  - Pixel Perfect Layout (12px overlap)
+  - Animated Buttons (Sliding Arrow effect)
+  - All text editable via Shopify Customizer
+  - 100% Vanilla CSS & Liquid
 {% endcomment %}
 
 <style>
@@ -18,41 +18,38 @@
     position: relative;
     overflow: hidden;
   }
-  /* BASE BUTTON ANIMATION LOGIC */
+
+  /* =============================================
+     ANIMATIONS & HOVER EFFECTS
+     ============================================= */
   .gg-topbar__btn, .gg-hero__cta {
-    transition: all 0.3s ease-in-out;
-    position: relative;
-    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
   }
 
-  /* Hover effect for Yellow Button */
+  /* Yellow Button Hover */
   .gg-topbar__btn:hover {
     background-color: #000000 !important;
     color: #FFF544 !important;
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
   }
 
-  /* Hover effect for Black SHOP NOW Button */
+  /* Black Button Hover */
   .gg-hero__cta:hover {
     background-color: #333333 !important;
-    letter-spacing: 2px;
     transform: translateY(-2px);
+    letter-spacing: 1px;
   }
 
-  /* Arrow Animation */
+  /* Sliding Arrow Animation */
   .gg-topbar__btn span, .gg-hero__cta span {
     display: inline-block;
     transition: transform 0.3s ease;
+    margin-left: 8px;
   }
 
   .gg-topbar__btn:hover span, .gg-hero__cta:hover span {
-    transform: translateX(5px); /* Makes the arrow slide to the right */
-  }
-
-  /* Ensure the text is editable but follows Figma layout */
-  .gg-topbar__text {
-    /* ... existing styles ... */
+    transform: translateX(6px);
   }
 
   /* =============================================
@@ -64,14 +61,13 @@
     justify-content: center;
     align-items: center;
     padding: 10px 50px;
-    gap: 360px; /* Exact Figma Gap */
+    gap: 360px; 
     width: 100%;
     height: 64px;
     background: #F5F5F5;
     box-sizing: border-box;
   }
 
-  /* Logo: TISSO VISION (Group 1000007777) */
   .gg-topbar__logo {
     width: 151.44px;
     height: 19px;
@@ -86,15 +82,13 @@
     order: 0;
   }
 
-  /* Center Text: Find the ideal... */
   .gg-topbar__text {
     width: 260px;
     height: 14px;
     font-family: 'Jost', sans-serif;
-    font-style: normal;
     font-weight: 400;
     font-size: 16px;
-    line-height: 13px; /* 84% as per Figma */
+    line-height: 13px;
     display: flex;
     align-items: center;
     text-align: center;
@@ -103,7 +97,6 @@
     order: 1;
   }
 
-  /* Yellow Button (Group 1000007810) */
   .gg-topbar__btn {
     width: 207px;
     height: 44px;
@@ -146,7 +139,7 @@
   .gg-hero__bottom-row {
     display: flex;
     width: 100%;
-    margin-top: -12px; /* Figma Overlap Correction */
+    margin-top: -12px; 
     position: relative;
     z-index: 2;
   }
@@ -221,6 +214,7 @@
     font-size: 14px;
     margin: 0;
     letter-spacing: 1px;
+    text-transform: uppercase;
   }
 
   /* Responsive Adjustments */
@@ -241,9 +235,11 @@
   
   <!-- Info Bar -->
   <div class="gg-topbar">
-    <a href="/" class="gg-topbar__logo">TISSO VISION</a>
-    <span class="gg-topbar__text">Find the ideal gift for your loved ones.</span>
-    <a href="{{ section.settings.top_url }}" class="gg-topbar__btn">CHOOSE GIFT &nbsp; &rarr;</a>
+    <a href="/" class="gg-topbar__logo">{{ section.settings.logo_text }}</a>
+    <span class="gg-topbar__text">{{ section.settings.tagline_text }}</span>
+    <a href="{{ section.settings.top_url }}" class="gg-topbar__btn">
+      {{ section.settings.top_btn_text }} <span>&rarr;</span>
+    </a>
   </div>
 
   <!-- Hero -->
@@ -255,13 +251,11 @@
 
     <div class="gg-hero__bottom-row">
       <div class="gg-hero__content">
-        <h1 class="gg-hero__title">The Gift Guide</h1>
-        <p class="gg-hero__desc">
-          Discover Joy: Your Ultimate Holiday Gift Destination. 
-          Explore our curated selection and find the perfect gifts to 
-          delight your loved ones this holiday season.
-        </p>
-        <a href="{{ section.settings.cta_url }}" class="gg-hero__cta">SHOP NOW &nbsp; &rarr;</a>
+        <h1 class="gg-hero__title">{{ section.settings.hero_title }}</h1>
+        <p class="gg-hero__desc">{{ section.settings.hero_desc }}</p>
+        <a href="{{ section.settings.cta_url }}" class="gg-hero__cta">
+          {{ section.settings.cta_text }} <span>&rarr;</span>
+        </a>
       </div>
 
       <div class="gg-hero__bottom-frame">
@@ -273,7 +267,7 @@
 
   <!-- Ticker -->
   <div class="gg-ticker">
-    <p>SUSTAINABLE, ETHICALLY MADE CLOTHES IN SIZES XXS TO 6XL</p>
+    <p>{{ section.settings.ticker_text }}</p>
   </div>
 
 </div>
@@ -282,9 +276,75 @@
 {
   "name": "Gift Guide Banner",
   "settings": [
-    { "type": "url", "id": "top_url", "label": "Top Button Link" },
-    { "type": "url", "id": "cta_url", "label": "Shop Now Link" }
+    {
+      "type": "header",
+      "content": "Top Bar Settings"
+    },
+    {
+      "type": "text",
+      "id": "logo_text",
+      "label": "Logo Text",
+      "default": "TISSO VISION"
+    },
+    {
+      "type": "text",
+      "id": "tagline_text",
+      "label": "Tagline Text",
+      "default": "Find the ideal gift for your loved ones."
+    },
+    {
+      "type": "text",
+      "id": "top_btn_text",
+      "label": "Top Button Label",
+      "default": "CHOOSE GIFT"
+    },
+    {
+      "type": "url",
+      "id": "top_url",
+      "label": "Top Button Link"
+    },
+    {
+      "type": "header",
+      "content": "Hero Content Settings"
+    },
+    {
+      "type": "text",
+      "id": "hero_title",
+      "label": "Main Title",
+      "default": "The Gift Guide"
+    },
+    {
+      "type": "textarea",
+      "id": "hero_desc",
+      "label": "Main Description",
+      "default": "Discover Joy: Your Ultimate Holiday Gift Destination. Explore our curated selection and find the perfect gifts to delight your loved ones this holiday season."
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "CTA Button Label",
+      "default": "SHOP NOW"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "Shop Now Link"
+    },
+    {
+      "type": "header",
+      "content": "Ticker Settings"
+    },
+    {
+      "type": "text",
+      "id": "ticker_text",
+      "label": "Ticker Text",
+      "default": "SUSTAINABLE, ETHICALLY MADE CLOTHES IN SIZES XXS TO 6XL"
+    }
   ],
-  "presets": [{ "name": "Gift Guide Banner" }]
+  "presets": [
+    {
+      "name": "Gift Guide Banner"
+    }
+  ]
 }
 {% endschema %}

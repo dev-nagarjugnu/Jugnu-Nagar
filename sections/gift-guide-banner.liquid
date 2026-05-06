@@ -18,6 +18,42 @@
     position: relative;
     overflow: hidden;
   }
+  /* BASE BUTTON ANIMATION LOGIC */
+  .gg-topbar__btn, .gg-hero__cta {
+    transition: all 0.3s ease-in-out;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Hover effect for Yellow Button */
+  .gg-topbar__btn:hover {
+    background-color: #000000 !important;
+    color: #FFF544 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  }
+
+  /* Hover effect for Black SHOP NOW Button */
+  .gg-hero__cta:hover {
+    background-color: #333333 !important;
+    letter-spacing: 2px;
+    transform: translateY(-2px);
+  }
+
+  /* Arrow Animation */
+  .gg-topbar__btn span, .gg-hero__cta span {
+    display: inline-block;
+    transition: transform 0.3s ease;
+  }
+
+  .gg-topbar__btn:hover span, .gg-hero__cta:hover span {
+    transform: translateX(5px); /* Makes the arrow slide to the right */
+  }
+
+  /* Ensure the text is editable but follows Figma layout */
+  .gg-topbar__text {
+    /* ... existing styles ... */
+  }
 
   /* =============================================
      PART 1: INFO BAR (Frame 1956)
@@ -35,7 +71,7 @@
     box-sizing: border-box;
   }
 
-  /* Logo: TISSO VISON (Group 1000007777) */
+  /* Logo: TISSO VISION (Group 1000007777) */
   .gg-topbar__logo {
     width: 151.44px;
     height: 19px;
@@ -205,7 +241,7 @@
   
   <!-- Info Bar -->
   <div class="gg-topbar">
-    <a href="/" class="gg-topbar__logo">TISSO VISON</a>
+    <a href="/" class="gg-topbar__logo">TISSO VISION</a>
     <span class="gg-topbar__text">Find the ideal gift for your loved ones.</span>
     <a href="{{ section.settings.top_url }}" class="gg-topbar__btn">CHOOSE GIFT &nbsp; &rarr;</a>
   </div>

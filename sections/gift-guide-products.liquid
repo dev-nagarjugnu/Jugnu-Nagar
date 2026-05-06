@@ -1,9 +1,8 @@
 {% comment %}
-  Gift Guide Products Section - FIGMA COMPONENT UPGRADE
-  - Popup Size: 311px x 447px
-  - Title: Jost 300, 16px
-  - Price: Lustria 400, 16px
-  - Button: 271px x 45px with Animation
+  Gift Guide Products Section - FINAL UPGRADE
+  - Popup Size: 311px x 447px (Figma Match)
+  - Layout: Color Selection (Top), Size Selection (Bottom)
+  - Fonts: Title (Jost 300), Price (Lustria 400), Button (Jost 400)
   - Logic: Black + Medium/M = Bonus Jacket
 {% endcomment %}
 
@@ -161,7 +160,7 @@
 </style>
 
 <div class="gg-prod-section">
-  <h2 class="gg-prod__heading">{{ section.settings.heading }}</h2>
+  <h2 class="gg-prod__heading">{{ section.settings.heading | default: 'Tisso vision in the wild' }}</h2>
   <div class="gg-prod__grid">
     {% assign col = collections[section.settings.collection] | default: collections['gift-guide'] | default: collections['all'] %}
     {% for product in col.products limit: 6 %}
@@ -230,24 +229,31 @@
     const escHtml = (s) => String(s ?? '').replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
     const escJsSingle = (s) => String(s ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
+    // FIND OPTIONS DYNAMICALLY
+    const colorOptIdx = activeProduct.options.findIndex(opt => (typeof opt === 'string' ? opt : opt.name).toLowerCase().includes('color')) + 1;
+    const sizeOptIdx = activeProduct.options.findIndex(opt => (typeof opt === 'string' ? opt : opt.name).toLowerCase().includes('size')) + 1;
+
     let optHtml = '';
-    activeProduct.options.forEach((opt, i) => {
-      const idx = i + 1;
-      const optName = (typeof opt === 'string') ? opt : (opt.name || "");
-      const values = [...new Set(activeProduct.variants.map(v => v[`option${idx}`]))];
-      
+
+    // RENDER COLOR FIRST (If exists)
+    if (colorOptIdx > 0) {
+      const vals = [...new Set(activeProduct.variants.map(v => v[`option${colorOptIdx}`]))];
+      const optName = typeof activeProduct.options[colorOptIdx-1] === 'string' ? activeProduct.options[colorOptIdx-1] : activeProduct.options[colorOptIdx-1].name;
       optHtml += `<label class="qv-option-label">${escHtml(optName)}</label>`;
-      
-      if (optName.toLowerCase().includes('color')) {
-        optHtml += `<div class="qv-segmented-control">` + values.map(v => `
-          <div class="qv-segment ${activeOptions[`option${idx}`] === v ? 'selected' : ''}" 
-               onclick="setOpt(${idx}, '${escJsSingle(v)}')">${escHtml(v)}</div>`).join('') + `</div>`;
-      } else {
-        optHtml += `<div class="qv-select-wrap">
-          <select class="qv-select" onchange="setOpt(${idx}, this.value)">` + values.map(v => `
-          <option value="${escHtml(v)}" ${activeOptions[`option${idx}`] === v ? 'selected' : ''}>${escHtml(v)}</option>`).join('') + `</select></div>`;
-      }
-    });
+      optHtml += `<div class="qv-segmented-control">` + vals.map(v => `
+        <div class="qv-segment ${activeOptions[`option${colorOptIdx}`] === v ? 'selected' : ''}" 
+             onclick="setOpt(${colorOptIdx}, '${escJsSingle(v)}')">${escHtml(v)}</div>`).join('') + `</div>`;
+    }
+
+    // RENDER SIZE SECOND (If exists)
+    if (sizeOptIdx > 0) {
+      const vals = [...new Set(activeProduct.variants.map(v => v[`option${sizeOptIdx}`]))];
+      const optName = typeof activeProduct.options[sizeOptIdx-1] === 'string' ? activeProduct.options[sizeOptIdx-1] : activeProduct.options[sizeOptIdx-1].name;
+      optHtml += `<label class="qv-option-label">${escHtml(optName)}</label>`;
+      optHtml += `<div class="qv-select-wrap">
+        <select class="qv-select" onchange="setOpt(${sizeOptIdx}, this.value)">` + vals.map(v => `
+        <option value="${escHtml(v)}" ${activeOptions[`option${sizeOptIdx}`] === v ? 'selected' : ''}>${escHtml(v)}</option>`).join('') + `</select></div>`;
+    }
 
     body.innerHTML = `
       <div class="qv-header">

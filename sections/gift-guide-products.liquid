@@ -1,8 +1,8 @@
 {% comment %}
   ==============================================================================
-  SECTION: Gift Guide Products (V5 - FINAL DIAGNOSIS VERSION)
-  - FIX: Added verbose logging to identify why the bonus logic fails.
-  - FIX: Added .trim() to option checking to prevent spacing issues.
+  SECTION: Gift Guide Products (V6 - PRODUCT SELECTOR VERSION)
+  - FIX: Uses a real Shopify Product Selector for the bonus jacket.
+  - FIX: Dynamic Option Detection (handles Color/Size in any order).
   - REQUIREMENTS: Vanilla JS Only, Lustria & Jost Fonts.
   ==============================================================================
 {% endcomment %}
@@ -13,7 +13,7 @@
   .gg-prod-section { max-width: 1440px; margin: 80px auto; padding: 0 50px; font-family: 'Jost', sans-serif; color: #000; }
   .gg-prod__heading { font-family: 'Lustria', serif; font-size: 36px; font-weight: 400; margin-bottom: 40px; }
   .gg-prod__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-  .gg-prod__card { position: relative; width: 100%; line-height: 0; }
+  .gg-prod__card { position: relative; width: 100%; }
   .gg-prod__image-wrap { position: relative; aspect-ratio: 433 / 444; overflow: hidden; }
   .gg-prod__image-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.6s ease; }
   .gg-prod__card:hover img { transform: scale(1.05); }
@@ -76,8 +76,9 @@
 (function() {
   let activeProduct = null;
   let activeOptions = { option1: null, option2: null, option3: null };
-  // DIAGNOSIS: Ensure this handle matches your store exactly!
-  const BONUS_HANDLE = "soft-winter-jacket";
+  
+  // The ID is pulled from the Schema setting below
+  const BONUS_VARIANT_ID = {{ section.settings.bonus_product.selected_or_first_available_variant.id | json }};
 
   function init() {
     document.querySelectorAll('.js-open-modal').forEach(btn => {
@@ -137,7 +138,7 @@
       <div class="qv-right">
         <h3 class="qv-title">${activeProduct.title}</h3>
         <p class="qv-price">$${(variant.price / 100).toFixed(2)}</p>
-        <div class="qv-desc">${activeProduct.description.substring(0, 150)}...</div>
+        <div class="qv-desc">${activeProduct.description ? activeProduct.description.substring(0, 150) + '...' : ''}</div>
         ${optionsHtml}
         <button id="GGATC" class="qv-atc-btn" onclick="addToCartLogic(${variant.id})">ADD TO CART &nbsp; &rarr;</button>
       </div>`;
@@ -145,49 +146,27 @@
 
   window.addToCartLogic = async function(variantId) {
     const btn = document.getElementById('GGATC');
-    btn.innerText = "Checking Logic...";
+    btn.innerText = "Adding...";
     
     let items = [{ id: variantId, quantity: 1 }];
     
-    // 1. Clean data for checking
     const vals = Object.values(activeOptions).filter(x => x).map(x => x.toLowerCase().trim());
-    console.log("Selected Values:", vals);
-
-    // 2. The Logic Check
     const isBlack = vals.includes('black');
     const isMedium = vals.includes('medium') || vals.includes('m');
 
-    if (isBlack && isMedium) {
-      btn.innerText = "Bonus Triggered...";
-      try {
-        const res = await fetch(`/products/${BONUS_HANDLE}.js`);
-        if (res.ok) {
-          const bonus = await res.json();
-          if (bonus.variants && bonus.variants[0]) {
-            items.push({ id: bonus.variants[0].id, quantity: 1 });
-            btn.innerText = "Bonus Product Found!";
-          }
-        } else {
-          // If fetch fails, the handle is wrong
-          btn.innerText = "Bonus Handle Error!";
-          alert("ERROR: The product handle 'soft-winter-jacket' was not found in your store. Please check the URL handle of the jacket.");
-          return;
-        }
-      } catch (e) { console.error(e); }
-    } else {
-      btn.innerText = "Adding Normal Item...";
+    // Requirement: If Black & Medium, add the selected bonus jacket
+    if (isBlack && isMedium && BONUS_VARIANT_ID) {
+       items.push({ id: BONUS_VARIANT_ID, quantity: 1 });
     }
 
-    // 3. Final Push to Cart
     fetch('/cart/add.js', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ items: items })
     })
-    .then(r => r.json())
     .then(() => {
       btn.innerText = "Added Successfully!";
-      setTimeout(() => { window.location.reload(); }, 1000);
+      setTimeout(() => { window.location.reload(); }, 800);
     });
   };
 
@@ -200,7 +179,8 @@
   "name": "Gift Guide Products",
   "settings": [
     { "type": "text", "id": "heading", "label": "Heading", "default": "Tisso vision in the wild" },
-    { "type": "collection", "id": "collection", "label": "Collection" }
+    { "type": "collection", "id": "collection", "label": "Collection" },
+    { "type": "product", "id": "bonus_product", "label": "Select Bonus Jacket (Soft Winter Jacket)" }
   ],
   "presets": [{ "name": "Gift Guide Products" }]
 }

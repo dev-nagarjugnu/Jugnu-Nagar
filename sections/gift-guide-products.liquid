@@ -295,9 +295,9 @@
       <div class="qv-header">
         <div class="qv-img-box"><img src="${variant.featured_image ? variant.featured_image.src : activeProduct.featured_image}"></div>
         <div class="qv-text-box">
-          <h3 class="qv-title">${activeProduct.title}</h3>
+          <h3 class="qv-title">${esc(activeProduct.title)}</h3>
           <p class="qv-price">${(variant.price / 100).toFixed(2).replace('.', ',')}€</p>
-          <div class="qv-desc">${activeProduct.description ? activeProduct.description.substring(0, 120) + '...' : ''}</div>
+          <div class="qv-desc">${activeProduct.description ? esc(activeProduct.description.substring(0, 120)) + '...' : ''}</div>
         </div>
       </div>
       <div class="qv-options-area">${optionsHtml}</div>
@@ -308,6 +308,7 @@
 
   window.handleAddToCart = async function(id) {
     const btn = document.querySelector('.qv-atc-btn');
+    if (!btn) return;
     btn.innerHTML = "PROCESSING... <span>&rarr;</span>";
     
     let items = [{ id: id, quantity: 1 }];
@@ -325,14 +326,26 @@
     }
 
     // Vanilla JS fetch to Shopify Cart API
-    fetch('/cart/add.js', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items: items })
-    }).then(() => {
+    try {
+      const response = await fetch('/cart/add.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: items })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Cart request failed: ${response.status}`);
+      }
+
       btn.innerHTML = "ADDED! ✓";
       setTimeout(() => { window.location.reload(); }, 1000);
-    });
+    } catch (error) {
+      btn.innerHTML = "TRY AGAIN";
+      setTimeout(() => {
+        btn.innerHTML = "ADD TO CART <span>&rarr;</span>";
+      }, 1200);
+      console.error('Add to cart failed', error);
+    }
   };
 
   // Safe Initialize

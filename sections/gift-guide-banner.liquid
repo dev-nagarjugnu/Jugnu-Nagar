@@ -1,16 +1,16 @@
 {% comment %}
   Gift Guide Banner - Pixel Perfect Figma Implementation
-  - Top Bar: 64px
-  - Top Image: 1440px (Full Width)
-  - Bottom Row: Content (550px) | Bottom Image (890px)
-  - Seamless Stitching: 12px overlap calculated from Figma 'top' values
+  - Top Bar: Exact Auto-layout (Gap 360px, Padding 10px 50px)
+  - Hero Top Image: 1440px Full Width
+  - Hero Bottom: Content (550px) | Illustration (890px)
+  - Stitching: 12px overlap for seamless illustration
 {% endcomment %}
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Jost:wght@400;500&display=swap');
 
-  /* Root reset for the section to ensure edge-to-edge 1440px */
-  .gg-container {
+  /* Container Reset */
+  .gg-section-container {
     width: 100%;
     max-width: 1440px;
     margin: 0 auto;
@@ -19,44 +19,81 @@
     overflow: hidden;
   }
 
-  /* PART 1 - TOP BAR (64px) */
+  /* =============================================
+     PART 1: INFO BAR (Frame 1956)
+     ============================================= */
   .gg-topbar {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 50px;
+    gap: 360px; /* Exact Figma Gap */
+    width: 100%;
     height: 64px;
     background: #F5F5F5;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 67px; /* Aligning with button/text left margin */
     box-sizing: border-box;
   }
 
-  .gg-topbar__text {
+  /* Logo: TISSO VISON (Group 1000007777) */
+  .gg-topbar__logo {
+    width: 151.44px;
+    height: 19px;
     font-family: 'Jost', sans-serif;
-    font-size: 16px;
+    font-weight: 500;
+    font-size: 20px;
     color: #000000;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    flex: none;
+    order: 0;
   }
 
+  /* Center Text: Find the ideal... */
+  .gg-topbar__text {
+    width: 260px;
+    height: 14px;
+    font-family: 'Jost', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 13px; /* 84% as per Figma */
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: #000000;
+    flex: none;
+    order: 1;
+  }
+
+  /* Yellow Button (Group 1000007810) */
   .gg-topbar__btn {
+    width: 207px;
+    height: 44px;
     background: #FFF544;
     color: #000000;
     font-family: 'Jost', sans-serif;
     font-size: 16px;
     font-weight: 500;
     text-decoration: none;
-    padding: 12px 24px;
     display: flex;
     align-items: center;
+    justify-content: center;
     text-transform: uppercase;
+    flex: none;
+    order: 2;
   }
 
-  /* PART 2 - HERO SECTION */
+  /* =============================================
+     PART 2: HERO SECTION
+     ============================================= */
   .gg-hero {
     width: 100%;
     display: flex;
     flex-direction: column;
   }
 
-  /* Top Image: Full Width 1440px */
   .gg-hero__top-frame {
     width: 100%;
     height: 390px;
@@ -70,23 +107,21 @@
     display: block;
   }
 
-  /* Bottom Row: Text Left (550px) | Image Right (890px) */
   .gg-hero__bottom-row {
     display: flex;
     width: 100%;
-    margin-top: -12px; /* Figma overlap: Top ends at 454, Bottom starts at 442 */
+    margin-top: -12px; /* Figma Overlap Correction */
     position: relative;
     z-index: 2;
   }
 
-  /* Content Left: 550px */
   .gg-hero__content {
     width: 550px;
     background: #FFFFFF;
     display: flex;
     flex-direction: column;
-    padding-left: 67px; /* From Figma: left: 67px */
-    padding-top: 47px;  /* Figma Title 489px - Row Start 442px */
+    padding-left: 67px;
+    padding-top: 47px;
     box-sizing: border-box;
   }
 
@@ -95,7 +130,7 @@
     font-weight: 500;
     font-size: 70px;
     line-height: 100%;
-    margin: 0 0 50px 0; /* Space to description */
+    margin: 0 0 50px 0;
     color: #000000;
   }
 
@@ -103,8 +138,8 @@
     font-family: 'Jost', sans-serif;
     font-size: 20px;
     line-height: 140%;
-    max-width: 483px; /* From Figma */
-    margin: 0 0 50px 0; /* Space to CTA */
+    max-width: 483px;
+    margin: 0 0 50px 0;
     color: #000000;
   }
 
@@ -122,7 +157,6 @@
     text-transform: uppercase;
   }
 
-  /* Image Right: 890px */
   .gg-hero__bottom-frame {
     width: 890px;
     height: 402px;
@@ -136,7 +170,7 @@
     display: block;
   }
 
-  /* PART 3 - TICKER */
+  /* PART 3: TICKER */
   .gg-ticker {
     height: 34px;
     background: #F5F5F5;
@@ -150,40 +184,39 @@
     font-family: 'Jost', sans-serif;
     font-size: 14px;
     margin: 0;
-    text-transform: uppercase;
     letter-spacing: 1px;
   }
 
-  /* MOBILE RESPONSIVE */
-  @media screen and (max-width: 1024px) {
+  /* Responsive Adjustments */
+  @media screen and (max-width: 1200px) {
+    .gg-topbar { gap: 100px; padding: 10px 20px; }
+  }
+
+  @media screen and (max-width: 768px) {
+    .gg-topbar { flex-direction: column; height: auto; gap: 15px; padding: 20px; }
     .gg-hero__bottom-row { flex-direction: column; margin-top: 0; }
     .gg-hero__content { width: 100%; padding: 40px 20px; align-items: center; text-align: center; }
     .gg-hero__bottom-frame { width: 100%; height: auto; }
-    .gg-hero__title { font-size: 48px; }
-    .gg-topbar { padding: 0 20px; }
+    .gg-hero__title { font-size: 40px; }
   }
 </style>
 
-<div class="gg-container">
+<div class="gg-section-container">
   
-  <!-- Part 1: Top Bar -->
+  <!-- Info Bar -->
   <div class="gg-topbar">
+    <a href="/" class="gg-topbar__logo">TISSO VISON</a>
     <span class="gg-topbar__text">Find the ideal gift for your loved ones.</span>
     <a href="{{ section.settings.top_url }}" class="gg-topbar__btn">CHOOSE GIFT &nbsp; &rarr;</a>
   </div>
 
-  <!-- Part 2: Main Hero -->
+  <!-- Hero -->
   <div class="gg-hero">
-    
-    <!-- Top Illustration (Full Width) -->
     <div class="gg-hero__top-frame">
       <img src="https://cdn.shopify.com/s/files/1/0787/4730/4121/files/top-banner-frame.png?v=1777978681" 
-           alt="Gift Guide Illustration Top" 
-           class="gg-hero__top-img" 
-           width="1440" height="390" loading="eager">
+           alt="Gift Guide Top" class="gg-hero__top-img" width="1440" height="390" loading="eager">
     </div>
 
-    <!-- Bottom Row (Split Content/Image) -->
     <div class="gg-hero__bottom-row">
       <div class="gg-hero__content">
         <h1 class="gg-hero__title">The Gift Guide</h1>
@@ -197,15 +230,12 @@
 
       <div class="gg-hero__bottom-frame">
         <img src="https://cdn.shopify.com/s/files/1/0787/4730/4121/files/bottom-banner-frame.png?v=1777978681" 
-             alt="Gift Guide Illustration Bottom" 
-             class="gg-hero__bottom-img" 
-             width="890" height="402" loading="lazy">
+             alt="Gift Guide Bottom" class="gg-hero__bottom-img" width="890" height="402" loading="lazy">
       </div>
     </div>
-
   </div>
 
-  <!-- Part 3: Ticker -->
+  <!-- Ticker -->
   <div class="gg-ticker">
     <p>SUSTAINABLE, ETHICALLY MADE CLOTHES IN SIZES XXS TO 6XL</p>
   </div>

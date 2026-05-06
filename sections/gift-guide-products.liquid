@@ -173,22 +173,67 @@
 
   /* --- 3. MOBILE RESPONSIVE (FIGMA 2-COLUMN GRID) --- */
   @media (max-width: 767px) {
-    .gg-prod-section { padding: 0 16px; margin: 40px auto; }
-    .gg-prod__heading { font-size: 28px; margin-bottom: 24px; }
-    
-    /* FIGMA MOBILE REQUIREMENT: 2 COLUMNS */
-    .gg-prod__grid { 
-      grid-template-columns: repeat(2, 1fr); 
-      gap: 12px; 
+    .gg-prod-section {
+      /* Mobile main frame: 342px wide column layout with 20px gap */
+      width: min(342px, calc(100vw - 24px));
+      margin: 40px auto;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .gg-prod__heading {
+      width: min(248px, 100%);
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .gg-prod__grid {
+      /* Mobile product grid frame per Figma: wrap + 4px gap */
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      align-content: flex-start;
+      justify-content: flex-start;
+      gap: 4px;
+    }
+
+    .gg-prod__card {
+      width: 169px;
+      height: 186.42px;
+      flex: 0 0 169px;
+    }
+
+    .gg-prod__image-wrap {
+      width: 169px;
+      height: 186.42px;
+      aspect-ratio: auto;
     }
 
     .gg-prod__plus-btn { bottom: 12px; right: 12px; width: 28px; height: 28px; }
 
-    .gg-modal-container { 
-      width: 311px; /* Keeping original Figma width for consistency */
-      height: 447px; 
-      max-height: 90vh;
+    .gg-modal-container {
+      width: min(311px, calc(100vw - 24px));
+      height: auto;
+      min-height: 447px;
+      max-height: calc(100vh - 24px);
+      overflow-y: auto;
     }
+
+    .qv-header { gap: 12px; }
+    .qv-img-box { width: 118px; height: 132px; }
+    .qv-text-box { padding-right: 24px; }
+    .qv-title { font-size: 16px; }
+    .qv-atc-btn { min-height: 45px; }
   }
 </style>
 
